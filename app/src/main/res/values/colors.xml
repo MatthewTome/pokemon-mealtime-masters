@@ -7,4 +7,10 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="amber_700">#FFD966</color>
+    <color name="pink_300">#FFC2D1</color>
+    <color name="green_500">#7FFFD4</color>
+    <color name="sheetBackground">#FFF5E1</color>
+    <color name="primary">#FF7043</color>      <!-- vibrant orange -->
+    <color name="accent">#42A5F5</color>       <!-- bright blue -->
 </resources>

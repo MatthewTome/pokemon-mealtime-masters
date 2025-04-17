@@ -5,13 +5,100 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- List of logged meals -->
+    <!-- Daily Progress Section -->
+    <LinearLayout
+        android:id="@+id/progress_section"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:background="@color/white">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Today's Progress"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Calories"
+            android:textSize="14sp"
+            android:textColor="#555"
+            android:layout_marginTop="4dp"/>
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/prog_calories"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            app:indicatorColor="@color/primary"
+            app:trackColor="#FFE0E0"
+            android:layout_marginBottom="12dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Protein"
+            android:textSize="14sp"
+            android:textColor="#555"
+            android:layout_marginTop="4dp"/>
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/prog_protein"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            app:indicatorColor="@color/amber_700"
+            app:trackColor="#FFF8E1"
+            android:layout_marginBottom="12dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sugar"
+            android:textSize="14sp"
+            android:textColor="#555"
+            android:layout_marginTop="4dp"/>
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/prog_sugar"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            app:indicatorColor="@color/pink_300"
+            app:trackColor="#FCE4EC"
+            android:layout_marginBottom="12dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vitamins"
+            android:textSize="14sp"
+            android:textColor="#555"
+            android:layout_marginTop="4dp"/>
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/prog_vitamins"
+            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            app:indicatorColor="@color/green_500"
+            app:trackColor="#E8F5E9"
+            android:layout_marginBottom="16dp"/>
+    </LinearLayout>
+
+    <!-- Logged Meals List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/logged_meals_recycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginBottom="72dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_anchorGravity="bottom" />
 
     <!-- Bottom App Bar -->
     <com.google.android.material.bottomappbar.BottomAppBar
@@ -21,7 +108,7 @@
         android:layout_gravity="bottom"
         app:fabAlignmentMode="center" />
 
-    <!-- Floating Action Button anchored to the BottomAppBar -->
+    <!-- Add Meal Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_meal"
         android:layout_width="wrap_content"

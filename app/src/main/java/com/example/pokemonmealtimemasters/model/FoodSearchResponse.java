@@ -1,6 +1,7 @@
 package com.example.pokemonmealtimemasters.model;
 
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 import java.util.List;
 
 public class FoodSearchResponse {
@@ -26,7 +27,7 @@ public class FoodSearchResponse {
         this.foods = foods;
     }
 
-    public static class FoodItem {
+    public static class FoodItem implements Serializable {
         @SerializedName("fdcId")
         private String fdcId;
 
@@ -60,7 +61,7 @@ public class FoodSearchResponse {
             this.foodNutrients = foodNutrients;
         }
 
-        public static class FoodNutrient {
+        public static class FoodNutrient implements Serializable {
             @SerializedName("nutrientName")
             private String nutrientName;
 

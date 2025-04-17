@@ -63,13 +63,11 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
         resultsRecycler.setAdapter(mealAdapter);
 
         mealAdapter.setOnItemClickListener(item -> {
-            Bundle result = new Bundle();
-            result.putString("name", item.getDescription());
-            result.putDouble("calories", extractCalories(item));
-            result.putLong("timestamp", System.currentTimeMillis());
-            getParentFragmentManager().setFragmentResult("meal_logged", result);
-            dismiss();
+            NutritionDetailSheet
+                    .newInstance(item)
+                    .show(getParentFragmentManager(), "NutritionDetail");
         });
+
 
         searchButton.setOnClickListener(v -> {
             String q = searchInput.getText().toString().trim();

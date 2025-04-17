@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="0dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/sheetBackground">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/primary"
+        android:title="Nutrition Info"
+        android:titleTextColor="@android:color/white"
+        app:navigationIcon="@drawable/ic_back_arrow" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="?android:attr/dividerVertical"
+            android:showDividers="middle"
+            android:dividerPadding="12dp">
+
+            <TextView
+                android:id="@+id/text_calories"
+                style="@style/NutritionValue"
+                android:text="Calories: 0" />
+
+            <TextView
+                android:id="@+id/text_protein"
+                style="@style/NutritionValue"
+                android:text="Protein: 0g" />
+
+            <TextView
+                android:id="@+id/text_sugar"
+                style="@style/NutritionValue"
+                android:text="Sugar: 0g" />
+
+            <TextView
+                android:id="@+id/text_vitamins"
+                style="@style/NutritionValue"
+                android:text="Vitamins: No" />
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_add_meal"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="Add Meal"
+        app:cornerRadius="24dp"
+        app:backgroundTint="@color/accent" />
+</LinearLayout>
