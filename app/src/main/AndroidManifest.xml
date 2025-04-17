@@ -15,7 +15,7 @@
         android:theme="@style/Theme.PokemonMealtimeMasters"
         tools:targetApi="31">
         <activity
-            android:name=".ui.MealLoggingActivity"
+            android:name=".ui.MainActivity"
             android:exported="true"
             android:label="@string/title_activity_meal_logging"
             android:theme="@style/Theme.PokemonMealtimeMasters" >

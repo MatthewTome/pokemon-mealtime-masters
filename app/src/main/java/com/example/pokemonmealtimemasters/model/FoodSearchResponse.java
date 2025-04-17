@@ -1,7 +1,6 @@
 package com.example.pokemonmealtimemasters.model;
 
 import com.google.gson.annotations.SerializedName;
-
 import java.util.List;
 
 public class FoodSearchResponse {
@@ -34,6 +33,9 @@ public class FoodSearchResponse {
         @SerializedName("description")
         private String description;
 
+        @SerializedName("foodNutrients")
+        private List<FoodNutrient> foodNutrients;
+
         public String getFdcId() {
             return fdcId;
         }
@@ -48,6 +50,38 @@ public class FoodSearchResponse {
 
         public void setDescription(String description) {
             this.description = description;
+        }
+
+        public List<FoodNutrient> getFoodNutrients() {
+            return foodNutrients;
+        }
+
+        public void setFoodNutrients(List<FoodNutrient> foodNutrients) {
+            this.foodNutrients = foodNutrients;
+        }
+
+        public static class FoodNutrient {
+            @SerializedName("nutrientName")
+            private String nutrientName;
+
+            @SerializedName("value")
+            private double value;
+
+            public String getNutrientName() {
+                return nutrientName;
+            }
+
+            public void setNutrientName(String nutrientName) {
+                this.nutrientName = nutrientName;
+            }
+
+            public double getValue() {
+                return value;
+            }
+
+            public void setValue(double value) {
+                this.value = value;
+            }
         }
     }
 }

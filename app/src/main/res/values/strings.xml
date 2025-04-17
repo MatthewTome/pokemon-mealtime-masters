@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">PokemonMealtimeMasters</string>
     <string name="title_activity_meal_logging">MealLoggingActivity</string>
+    <string name="add_meal" />
+    <string name="meal_name">Meal Name</string>
+    <string name="calories_0">Calories: 0</string>
+    <string name="time">Time</string>
 </resources>

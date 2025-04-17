@@ -78,6 +78,8 @@ dependencies {
     // Added dependencies
     implementation(libs.androidx.recyclerview)
     implementation(libs.constraintlayout)
+    implementation(libs.material)
+    implementation(libs.gson)
 
     // Network dependencies for FoodData Central API integration
     implementation(libs.retrofit)

@@ -1,39 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
+    android:background="?attr/colorSurface"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
+
+    <!-- Top bar with an X to close -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+        android:background="?attr/colorPrimary"
+        app:navigationIcon="@drawable/ic_back_arrow"
+        app:title="Log a Meal"/>
 
     <!-- Search Input -->
     <EditText
         android:id="@+id/search_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Search for a meal"
-        android:minHeight="48dp" />
+        android:hint="Search for a meal" />
 
-    <!-- Button to Trigger the Search -->
+    <!-- Search Button -->
     <Button
         android:id="@+id/search_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Search" />
+        android:text="Search"
+        android:layout_marginTop="8dp" />
 
-    <!-- RecyclerView for displaying search results -->
+    <!-- Search Results List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_results_recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp" />
 
-    <!-- Manual Entry Field for Meal Details -->
+    <!-- Manual Entry Field -->
     <EditText
         android:id="@+id/manual_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:hint="Enter meal details manually"
-        android:minHeight="48dp" />
-
+        android:layout_marginTop="16dp" />
 </LinearLayout>
