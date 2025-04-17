@@ -3,119 +3,293 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient">
 
-    <!-- Daily Progress Section -->
-    <LinearLayout
-        android:id="@+id/progress_section"
-        android:orientation="vertical"
+    <!-- Top App Bar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/top_app_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:background="@color/white">
+        android:layout_height="?attr/actionBarSize"
+        android:backgroundTint="@android:color/transparent"
+        android:title="Pokémon Mealtime Masters"
+        android:titleTextColor="@android:color/white"
+        app:navigationIcon="@drawable/ic_placeholder" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Today's Progress"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Calories"
-            android:textSize="14sp"
-            android:textColor="#555"
-            android:layout_marginTop="4dp"/>
-
-        <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/prog_calories"
-            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
-            android:layout_width="match_parent"
-            android:layout_height="8dp"
-            app:indicatorColor="@color/primary"
-            app:trackColor="#FFE0E0"
-            android:layout_marginBottom="12dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Protein"
-            android:textSize="14sp"
-            android:textColor="#555"
-            android:layout_marginTop="4dp"/>
-
-        <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/prog_protein"
-            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
-            android:layout_width="match_parent"
-            android:layout_height="8dp"
-            app:indicatorColor="@color/amber_700"
-            app:trackColor="#FFF8E1"
-            android:layout_marginBottom="12dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sugar"
-            android:textSize="14sp"
-            android:textColor="#555"
-            android:layout_marginTop="4dp"/>
-
-        <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/prog_sugar"
-            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
-            android:layout_width="match_parent"
-            android:layout_height="8dp"
-            app:indicatorColor="@color/pink_300"
-            app:trackColor="#FCE4EC"
-            android:layout_marginBottom="12dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Vitamins"
-            android:textSize="14sp"
-            android:textColor="#555"
-            android:layout_marginTop="4dp"/>
-
-        <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/prog_vitamins"
-            style="@style/Widget.MaterialComponents.LinearProgressIndicator"
-            android:layout_width="match_parent"
-            android:layout_height="8dp"
-            app:indicatorColor="@color/green_500"
-            app:trackColor="#E8F5E9"
-            android:layout_marginBottom="16dp"/>
-    </LinearLayout>
-
-    <!-- Logged Meals List -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/logged_meals_recycler"
+    <!-- Scrollable content under the AppBar -->
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginBottom="72dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_anchorGravity="bottom" />
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <!-- Bottom App Bar -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Top Bunny Icon -->
+                <ImageView
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_placeholder"
+                    android:contentDescription="Buddy Icon"/>
+
+                <!-- Title -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:text="Nutritional Information"
+                    android:textColor="#333333"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
+
+                <!-- Nutrient Row: Calories -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_placeholder"
+                        android:contentDescription="Calories"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Calories"
+                        android:textColor="#333333"
+                        android:textSize="16sp"/>
+
+                    <TextView
+                        android:id="@+id/text_calories_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="320"
+                        android:textColor="#333333"
+                        android:textSize="16sp"/>
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/prog_calories"
+                        style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+                        android:layout_width="100dp"
+                        android:layout_height="16dp"
+                        app:indicatorColor="@color/teal_700"
+                        app:trackColor="#B2DFDB"/>
+                </LinearLayout>
+
+                <!-- Protein Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_placeholder"
+                        android:contentDescription="Protein"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Protein"
+                        android:textColor="#333333"
+                        android:textSize="16sp"/>
+
+                    <TextView
+                        android:id="@+id/text_protein_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="15g"
+                        android:textColor="#333333"
+                        android:textSize="16sp"/>
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/prog_protein"
+                        style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+                        android:layout_width="100dp"
+                        android:layout_height="16dp"
+                        app:indicatorColor="@color/green_500"
+                        app:trackColor="#C8E6C9"/>
+                </LinearLayout>
+
+                <!-- Fats Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_placeholder"
+                        android:contentDescription="Fats"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Fats"
+                        android:textColor="#333333"
+                        android:textSize="16sp"/>
+
+                    <TextView
+                        android:id="@+id/text_fats_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="10g"
+                        android:textColor="#333333"
+                        android:textSize="16sp"/>
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/prog_fats"
+                        style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+                        android:layout_width="100dp"
+                        android:layout_height="16dp"
+                        app:indicatorColor="@color/amber_700"
+                        app:trackColor="#FFE0B2"/>
+                </LinearLayout>
+
+                <!-- Carbs Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_placeholder"
+                        android:contentDescription="Carbs"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Carbs"
+                        android:textColor="#333333"
+                        android:textSize="16sp"/>
+
+                    <TextView
+                        android:id="@+id/text_carbs_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="45g"
+                        android:textColor="#333333"
+                        android:textSize="16sp"/>
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/prog_carbs"
+                        style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+                        android:layout_width="100dp"
+                        android:layout_height="16dp"
+                        app:indicatorColor="@color/purple_500"
+                        app:trackColor="#E1BEE7"/>
+                </LinearLayout>
+
+                <!-- Vitamins Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_placeholder"
+                        android:contentDescription="Vitamins"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Vitamins"
+                        android:textColor="#333333"
+                        android:textSize="16sp"/>
+
+                    <TextView
+                        android:id="@+id/text_vitamins_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="100%"
+                        android:textColor="#333333"
+                        android:textSize="16sp"/>
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/prog_vitamins"
+                        style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+                        android:layout_width="100dp"
+                        android:layout_height="16dp"
+                        app:indicatorColor="@color/green_500"
+                        app:trackColor="#C8E6C9"/>
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/logged_meals_recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:clipToPadding="false"
+                    android:paddingBottom="16dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </ScrollView>
+
+    <!-- Centered FAB -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_meal"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        app:srcCompat="@drawable/ic_add"
+        android:tint="@android:color/white"
+        app:backgroundTint="@color/accent"
+        app:layout_anchor="@id/bottom_app_bar"
+        app:layout_anchorGravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Bottom App Bar (just for placement of FAB) -->
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottom_app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:fabAlignmentMode="center" />
-
-    <!-- Add Meal Floating Action Button -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add_meal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/add_meal"
-        app:srcCompat="@drawable/ic_add"
-        app:layout_anchor="@id/bottom_app_bar"
-        app:layout_anchorGravity="center" />
-
+        app:fabAlignmentMode="center"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
