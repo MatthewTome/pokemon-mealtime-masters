@@ -1,8 +1,28 @@
 <resources>
     <string name="app_name">PokemonMealtimeMasters</string>
     <string name="title">Pokémon Mealtime Masters</string>
-    <string name="add_meal" />
+    <string name="add_meal">Add Meal</string>
     <string name="meal_name">Meal Name</string>
     <string name="calories_0">Calories: 0</string>
     <string name="time">Time</string>
+    <string name="nutrition_info">Nutrition Info</string>
+    <string name="servings">Servings (e.g. 1.5)</string>
+    <string name="calories">Calories</string>
+    <string name="protein_g">Protein (g)</string>
+    <string name="carbs">Carbs (g)</string>
+    <string name="vitamins">vitamins</string>
+    <string name="settings">settings</string>
+    <string name="reset_today">reset_today</string>
+    <string name="vitamins_prompt" />
+    <string name="log_a_meal">Log a Meal</string>
+    <string name="search">Search</string>
+    <string name="search_for_a_meal">Search for a meal</string>
+    <string name="custom_food">Custom Food</string>
+    <string name="other_food_options">Other Food Options</string>
+    <string name="most_recent">Most Recent</string>
+    <string name="carbs_g">Carbs (g)</string>
+    <string name="buddy_icon">Buddy Icon</string>
+    <string name="nutritional_information">Nutritional Information</string>
+    <string name="protein">Protein</string>
+    <string name="fats">Fats</string>
 </resources>

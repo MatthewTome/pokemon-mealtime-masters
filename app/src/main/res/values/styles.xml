@@ -6,11 +6,8 @@
     </style>
 
     <style name="Widget.MPM.FullScreenBottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
-        <!-- Hide the peek height -->
         <item name="behavior_peekHeight">0dp</item>
-        <!-- Allow full expansion beyond content height -->
         <item name="behavior_fitToContents">false</item>
-        <!-- When expanded, offset 0 = flush at the top -->
         <item name="behavior_expandedOffset">0dp</item>
     </style>
 

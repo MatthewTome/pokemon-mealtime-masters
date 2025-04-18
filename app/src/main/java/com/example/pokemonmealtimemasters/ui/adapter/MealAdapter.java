@@ -11,28 +11,31 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.pokemonmealtimemasters.R;
 import com.example.pokemonmealtimemasters.model.FoodSearchResponse;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MealAdapter extends RecyclerView.Adapter<MealAdapter.ViewHolder> {
-
-    // Listener interface for click events
     public interface OnItemClickListener {
         void onItemClick(FoodSearchResponse.FoodItem item);
     }
 
-    private List<FoodSearchResponse.FoodItem> foodItems;
+    private List<FoodSearchResponse.FoodItem> data;
     private OnItemClickListener listener;
 
-    public MealAdapter(List<FoodSearchResponse.FoodItem> foodItems) {
-        this.foodItems = (foodItems != null) ? foodItems : new ArrayList<>();
+    public MealAdapter(List<FoodSearchResponse.FoodItem> data) {
+        this.data = data;
     }
 
-    /**
-     * Set the click listener for adapter items.
-     */
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
+    }
+
+    public List<FoodSearchResponse.FoodItem> getData() {
+        return data;
+    }
+
+    public void updateData(List<FoodSearchResponse.FoodItem> newData) {
+        this.data = newData;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -45,42 +48,26 @@ public class MealAdapter extends RecyclerView.Adapter<MealAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        FoodSearchResponse.FoodItem foodItem = foodItems.get(position);
-        holder.textDescription.setText(foodItem.getDescription());
-
-        // Handle item click
+        FoodSearchResponse.FoodItem item = data.get(position);
+        holder.name.setText(item.getDescription());
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onItemClick(foodItem);
+                listener.onItemClick(item);
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return foodItems.size();
+        return data == null ? 0 : data.size();
     }
 
-    /**
-     * Update the adapter's data set.
-     */
-    public void updateData(List<FoodSearchResponse.FoodItem> newItems) {
-        foodItems.clear();
-        if (newItems != null) {
-            foodItems.addAll(newItems);
-        }
-        notifyDataSetChanged();
-    }
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView name;
 
-    /**
-     * ViewHolder class for food items.
-     */
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView textDescription;
-
-        public ViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
-            textDescription = itemView.findViewById(R.id.text_description);
+            name = itemView.findViewById(R.id.text_food_name);
         }
     }
 }
