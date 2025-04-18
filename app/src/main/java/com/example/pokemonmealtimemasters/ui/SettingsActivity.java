@@ -3,31 +3,35 @@ package com.example.pokemonmealtimemasters.ui;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.widget.Button;
-
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.core.content.ContextCompat;
 import com.example.pokemonmealtimemasters.R;
 import com.google.android.material.appbar.MaterialToolbar;
-
 import java.util.Objects;
 
+/**
+ * Settings screen where the user can reset all logged meals and daily nutrient totals.
+ * Provides a toolbar with a back navigation icon and a single "Reset Today" button.
+ */
 public class SettingsActivity extends AppCompatActivity {
     @Override
-    protected void onCreate(Bundle s) {
-        super.onCreate(s);
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        MaterialToolbar settingsBar = findViewById(R.id.toolbar);
-        setSupportActionBar(settingsBar);
-        settingsBar.setTitleTextColor(getResources().getColor(android.R.color.black));
-        Drawable ov = settingsBar.getOverflowIcon();
-        if (ov != null) ov.setTint(getResources().getColor(android.R.color.black));
+        // Configure toolbar with back navigation and black-colored icons/text
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        int black = ContextCompat.getColor(this, android.R.color.black);
+        toolbar.setTitleTextColor(black);
+        Drawable overflow = toolbar.getOverflowIcon();
+        if (overflow != null) overflow.setTint(black);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-
-        Button btnReset = findViewById(R.id.button_reset_today);
-        btnReset.setOnClickListener(v -> {
-            // clear today’s meals & totals
+        // Reset button clears shared prefs values for today and returns to MainActivity
+        Button resetButton = findViewById(R.id.button_reset_today);
+        resetButton.setOnClickListener(v -> {
             getSharedPreferences("prefs", MODE_PRIVATE)
                     .edit()
                     .putString("logged_meals", "")
@@ -36,7 +40,7 @@ public class SettingsActivity extends AppCompatActivity {
                     .putFloat("daily_carbs",    0f)
                     .putInt(  "daily_vitamins", 0)
                     .apply();
-            finish(); // return to MainActivity
+            finish();
         });
     }
 

@@ -4,15 +4,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.pokemonmealtimemasters.R;
 import com.example.pokemonmealtimemasters.model.FoodSearchResponse;
-
 import java.util.List;
 
+/**
+ * Adapter for displaying a list of foods returned from the search API.
+ * Each item shows the food description and notifies a listener when tapped.
+ */
 public class MealAdapter extends RecyclerView.Adapter<MealAdapter.ViewHolder> {
     public interface OnItemClickListener {
         void onItemClick(FoodSearchResponse.FoodItem item);
@@ -62,7 +63,7 @@ public class MealAdapter extends RecyclerView.Adapter<MealAdapter.ViewHolder> {
         return data == null ? 0 : data.size();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView name;
 
         ViewHolder(@NonNull View itemView) {

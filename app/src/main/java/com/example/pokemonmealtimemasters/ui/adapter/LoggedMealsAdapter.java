@@ -1,73 +1,68 @@
-// File: app/src/main/java/com/example/pokemonmealtimemasters/ui/adapter/LoggedMealsAdapter.java
 package com.example.pokemonmealtimemasters.ui.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.pokemonmealtimemasters.R;
 import com.example.pokemonmealtimemasters.model.LoggedMeal;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class LoggedMealsAdapter
-        extends RecyclerView.Adapter<LoggedMealsAdapter.ViewHolder> {
-
-    // 1) Listener interface
+/**
+ * Adapter for displaying a list of meals the user has logged today.
+ * Each item shows the meal name, calorie count, and the time logged.
+ * Supports an optional click listener to handle item taps.
+ */
+public class LoggedMealsAdapter extends RecyclerView.Adapter<LoggedMealsAdapter.ViewHolder> {
     public interface OnItemClickListener {
         void onItemClick(LoggedMeal meal);
     }
 
-    // 2) Member fields
     private List<LoggedMeal> data;
     private OnItemClickListener listener;
 
-    // 3) Constructor
     public LoggedMealsAdapter(List<LoggedMeal> data) {
         this.data = data;
     }
 
-    // 4) Setter for the click listener
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
     }
 
-    // 5) Update data method
+    // Updates the adapter's data and refreshes the entire list.
     public void updateData(List<LoggedMeal> newData) {
         this.data = newData;
         notifyDataSetChanged();
     }
 
-    @NonNull @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
-                                         int viewType) {
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View item = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_logged_meal, parent, false);
         return new ViewHolder(item);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder,
-                                 int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         LoggedMeal meal = data.get(position);
         holder.name.setText(meal.getName());
         holder.details.setText(
                 String.format(Locale.getDefault(),
                         "%d cal – %s",
-                        (int)meal.getCalories(),
-                        formatTime(meal.getTimestamp()))
+                        (int) meal.getCalories(),
+                        formatTime(meal.getTimestamp())
+                )
         );
-
-        // wire up click
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onItemClick(meal);
+            if (listener != null) {
+                listener.onItemClick(meal);
+            }
         });
     }
 
@@ -76,9 +71,11 @@ public class LoggedMealsAdapter
         return data == null ? 0 : data.size();
     }
 
-    // ViewHolder
-    static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView name, details;
+    // Holds references to the views for each list item to avoid repeated findViewById() calls.
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView name;
+        TextView details;
+
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             name    = itemView.findViewById(R.id.text_meal_name);
@@ -86,7 +83,7 @@ public class LoggedMealsAdapter
         }
     }
 
-    // helper to format timestamp
+    // Formats a timestamp (ms since epoch) into a user-friendly time string (e.g. "02:30 PM").
     private String formatTime(long ts) {
         return new SimpleDateFormat("hh:mm a", Locale.getDefault())
                 .format(new Date(ts));

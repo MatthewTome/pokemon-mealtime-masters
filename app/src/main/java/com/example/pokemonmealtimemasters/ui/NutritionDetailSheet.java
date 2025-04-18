@@ -7,10 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.example.pokemonmealtimemasters.R;
 import com.example.pokemonmealtimemasters.model.FoodSearchResponse;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -18,13 +16,22 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-
 import java.util.Objects;
 
+/**
+ * Bottom sheet for displaying and editing the nutritional details of a selected food item.
+ * Supports pre-populating values from the FoodData Central API or leaving fields blank
+ * for custom input. On submission, returns the computed nutrient totals back to MainActivity.
+ */
 public class NutritionDetailSheet extends BottomSheetDialogFragment {
     private static final String ARG_ITEM = "item";
     private FoodSearchResponse.FoodItem item;
 
+    /**
+     * Factory method to create a new instance of this sheet with an optional FoodItem.
+     * @param item The FoodItem to display (null for custom entry)
+     * @return Configured NutritionDetailSheet instance
+     */
     public static NutritionDetailSheet newInstance(
             @Nullable FoodSearchResponse.FoodItem item
     ) {
@@ -35,7 +42,9 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
         return sheet;
     }
 
-    @Nullable @Override
+    // Inflates the layout and retrieves the passed FoodItem argument if present.
+    @Nullable
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -48,8 +57,13 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
         );
     }
 
-    @Override public void onViewCreated(@NonNull View view,
-                                        @Nullable Bundle savedInstanceState) {
+    /**
+     * Sets up the toolbar, input fields, and "Add Meal" button.
+     * Pre-fills fields if an item was passed; otherwise leaves them editable.
+     */
+    @Override
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
@@ -61,6 +75,7 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
         TextInputEditText editCarbs    = view.findViewById(R.id.edit_carbs);
         MaterialButton   btnAdd        = view.findViewById(R.id.button_add_meal);
 
+        // Prefill with one serving if a FoodItem is provided
         if (item != null) {
             editServings.setText("1");
             editCalories.setText(
@@ -74,6 +89,7 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
             );
         }
 
+        // Handle the Add Meal click: calculate totals and return result
         btnAdd.setOnClickListener(v -> {
             try {
                 double servings = Double.parseDouble(
@@ -85,7 +101,7 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
                 double prot = Double.parseDouble(
                         Objects.requireNonNull(editProtein.getText()).toString()
                 ) * servings;
-                double sug  = Double.parseDouble(
+                double carbs= Double.parseDouble(
                         Objects.requireNonNull(editCarbs.getText()).toString()
                 ) * servings;
 
@@ -96,10 +112,8 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
                 );
                 result.putDouble("calories", cal);
                 result.putDouble("protein",  prot);
-                result.putDouble("carbs",    sug);
-                result.putLong("timestamp",
-                        System.currentTimeMillis()
-                );
+                result.putDouble("carbs",    carbs);
+                result.putLong(  "timestamp", System.currentTimeMillis());
 
                 getParentFragmentManager()
                         .setFragmentResult("meal_logged", result);
@@ -112,7 +126,8 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
         });
     }
 
-    @Override public void onStart() {
+    @Override
+    public void onStart() {
         super.onStart();
         Dialog dialog = getDialog();
         if (dialog != null) {
@@ -122,13 +137,17 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
             if (sheet != null) {
                 BottomSheetBehavior<FrameLayout> behavior =
                         BottomSheetBehavior.from(sheet);
-                behavior.setState(
-                        BottomSheetBehavior.STATE_EXPANDED
-                );
+                behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             }
         }
     }
 
+    /**
+     * Helper to extract nutrient values by name from the FoodItem.
+     * @param it The FoodItem
+     * @param key Nutrient name to look up (e.g., "Energy")
+     * @return Nutrient value or 0 if not found
+     */
     private double extract(
             FoodSearchResponse.FoodItem it, String key
     ) {

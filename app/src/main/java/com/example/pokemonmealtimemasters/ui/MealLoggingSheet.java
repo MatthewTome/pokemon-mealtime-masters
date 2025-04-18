@@ -8,12 +8,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.pokemonmealtimemasters.BuildConfig;
 import com.example.pokemonmealtimemasters.R;
 import com.example.pokemonmealtimemasters.model.FoodSearchResponse;
@@ -27,19 +25,24 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Bottom sheet fragment that allows users to log a meal via three
+ * modes: search by text, select from recent/preset lists, or custom entry.
+ * It retrieves nutritional data from the FoodData Central API and
+ * navigates to the NutritionDetailSheet for final entry.
+ */
 public class MealLoggingSheet extends BottomSheetDialogFragment {
     private EditText searchInput;
-    private MealAdapter searchAdapter, presetAdapter;
+    private MealAdapter searchAdapter;
+    private MealAdapter presetAdapter;
     private FoodDataService service;
     private SharedPreferences prefs;
     private Gson gson;
@@ -59,25 +62,29 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
         setStyle(STYLE_NORMAL, R.style.Theme_MPM_BottomSheet);
     }
 
-    @Nullable @Override
-    public View onCreateView(@NonNull LayoutInflater inf,
-                             @Nullable ViewGroup parent,
-                             @Nullable Bundle saved) {
-        return inf.inflate(R.layout.sheet_meal_logging, parent, false);
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.sheet_meal_logging, container, false);
     }
 
-    @Override public void onViewCreated(@NonNull View view, @Nullable Bundle saved) {
-        MaterialToolbar tb = view.findViewById(R.id.toolbar);
-        tb.setNavigationOnClickListener(b -> dismiss());
+    /**
+     * Initialize UI components, network service, and shared prefs.
+     * Sets up search input, recent and preset lists, and custom button.
+     */
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(v -> dismiss());
 
-        service = ApiClient.getClient(requireContext())
-                .create(FoodDataService.class);
-        prefs   = requireContext()
-                .getSharedPreferences(PREFS_NAME, 0);
+        service = ApiClient.getClient(requireContext()).create(FoodDataService.class);
+        prefs   = requireContext().getSharedPreferences(PREFS_NAME, 0);
         gson    = new Gson();
 
-        // --- SEARCH SETUP ---
-        searchInput = view.findViewById(R.id.search_input);
+        // Search section
+        searchInput   = view.findViewById(R.id.search_input);
         Button searchButton = view.findViewById(R.id.search_button);
         RecyclerView searchRecycler = view.findViewById(R.id.search_results_recycler);
         searchRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -86,18 +93,19 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
         searchRecycler.setVisibility(View.GONE);
         searchAdapter.setOnItemClickListener(this::openDetail);
 
-        searchButton.setOnClickListener(b -> {
-            String q = searchInput.getText().toString().trim();
-            if (q.isEmpty()) {
+        searchButton.setOnClickListener(v -> {
+            String query = searchInput.getText().toString().trim();
+            if (query.isEmpty()) {
                 Toast.makeText(requireContext(), "Enter a search term", Toast.LENGTH_SHORT).show();
                 return;
             }
-            service.searchFood(q, BuildConfig.FDC_API_KEY)
+            service.searchFood(query, BuildConfig.FDC_API_KEY)
                     .enqueue(new Callback<>() {
                         @Override
-                        public void onResponse(@NonNull Call<FoodSearchResponse> c, @NonNull Response<FoodSearchResponse> r) {
-                            if (r.isSuccessful() && r.body() != null) {
-                                searchAdapter.updateData(r.body().getFoods());
+                        public void onResponse(@NonNull Call<FoodSearchResponse> call,
+                                               @NonNull Response<FoodSearchResponse> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                searchAdapter.updateData(response.body().getFoods());
                                 searchRecycler.setVisibility(View.VISIBLE);
                             } else {
                                 Toast.makeText(requireContext(), "No results", Toast.LENGTH_SHORT).show();
@@ -105,79 +113,90 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
                         }
 
                         @Override
-                        public void onFailure(@NonNull Call<FoodSearchResponse> c, @NonNull Throwable t) {
+                        public void onFailure(@NonNull Call<FoodSearchResponse> call, @NonNull Throwable t) {
                             Toast.makeText(requireContext(), "Network error", Toast.LENGTH_SHORT).show();
                         }
                     });
         });
 
-        // --- CUSTOM FOOD ---
-        Button custom = view.findViewById(R.id.button_custom_food);
-        custom.setOnClickListener(b -> openDetail(null));
+        // Custom entry button
+        Button customBtn = view.findViewById(R.id.button_custom_food);
+        customBtn.setOnClickListener(v -> openDetail(null));
 
-        // --- RECENT MEALS ---
-        RecyclerView recent = view.findViewById(R.id.recycler_recent);
-        recent.setLayoutManager(new LinearLayoutManager(requireContext()));
+        // Recent meals list
+        RecyclerView recentRecycler = view.findViewById(R.id.recycler_recent);
+        recentRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
         LoggedMealsAdapter recentAdapter = new LoggedMealsAdapter(loadLoggedMeals());
-        recent.setAdapter(recentAdapter);
-        recentAdapter.setOnItemClickListener(m -> service.searchFood(m.getName(), BuildConfig.FDC_API_KEY)
-                .enqueue(new Callback<>() {
-                    @Override
-                    public void onResponse(@NonNull Call<FoodSearchResponse> c, @NonNull Response<FoodSearchResponse> r) {
-                        if (r.isSuccessful() && r.body() != null && !r.body().getFoods().isEmpty())
-                            openDetail(r.body().getFoods().get(0));
-                    }
+        recentRecycler.setAdapter(recentAdapter);
+        recentAdapter.setOnItemClickListener(meal ->
+                service.searchFood(meal.getName(), BuildConfig.FDC_API_KEY)
+                        .enqueue(new Callback<>() {
+                            @Override
+                            public void onResponse(@NonNull Call<FoodSearchResponse> call,
+                                                   @NonNull Response<FoodSearchResponse> response) {
+                                if (response.isSuccessful() && response.body() != null
+                                        && !response.body().getFoods().isEmpty()) {
+                                    openDetail(response.body().getFoods().get(0));
+                                }
+                            }
 
-                    @Override
-                    public void onFailure(@NonNull Call<FoodSearchResponse> c, @NonNull Throwable t) {
-                    }
-                }));
+                            @Override
+                            public void onFailure(@NonNull Call<FoodSearchResponse> call, @NonNull Throwable t) {
+                                // no-op
+                            }
+                        })
+        );
 
-        // --- PRESET OPTIONS ---
-        RecyclerView preset = view.findViewById(R.id.recycler_preset);
-        preset.setLayoutManager(new LinearLayoutManager(requireContext()));
+        // Preset options list
+        RecyclerView presetRecycler = view.findViewById(R.id.recycler_preset);
+        presetRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
         presetAdapter = new MealAdapter(new ArrayList<>());
-        preset.setAdapter(presetAdapter);
+        presetRecycler.setAdapter(presetAdapter);
         presetAdapter.setOnItemClickListener(this::openDetail);
         loadPresetOptions();
     }
 
-    @Override public void onStart() {
+    @Override
+    public void onStart() {
         super.onStart();
         View sheet = Objects.requireNonNull(getDialog())
                 .findViewById(com.google.android.material.R.id.design_bottom_sheet);
-        BottomSheetBehavior.from(sheet).setState(BottomSheetBehavior.STATE_EXPANDED);
+        BottomSheetBehavior.from(sheet)
+                .setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
     private List<LoggedMeal> loadLoggedMeals() {
-        String j = prefs.getString(KEY_LOGGED_MEALS, "");
-        if (j.isEmpty()) return new ArrayList<>();
-        Type t = new TypeToken<List<LoggedMeal>>(){}.getType();
-        List<LoggedMeal> all = gson.fromJson(j, t);
-        return all.size() <=5 ? all : all.subList(0,5);
+        String json = prefs.getString(KEY_LOGGED_MEALS, "");
+        if (json.isEmpty()) return new ArrayList<>();
+        Type type = new TypeToken<List<LoggedMeal>>(){}.getType();
+        List<LoggedMeal> all = gson.fromJson(json, type);
+        return all.size() <= 5 ? all : all.subList(0, 5);
     }
 
     private void loadPresetOptions() {
-        for (String q : PRESETS) {
-            service.searchFood(q, BuildConfig.FDC_API_KEY)
+        for (String query : PRESETS) {
+            service.searchFood(query, BuildConfig.FDC_API_KEY)
                     .enqueue(new Callback<>() {
                         @Override
-                        public void onResponse(@NonNull Call<FoodSearchResponse> c, @NonNull Response<FoodSearchResponse> r) {
-                            if (r.isSuccessful() && r.body() != null && !r.body().getFoods().isEmpty()) {
-                                List<FoodSearchResponse.FoodItem> cur =
+                        public void onResponse(@NonNull Call<FoodSearchResponse> call,
+                                               @NonNull Response<FoodSearchResponse> response) {
+                            if (response.isSuccessful() && response.body() != null
+                                    && !response.body().getFoods().isEmpty()) {
+                                List<FoodSearchResponse.FoodItem> current =
                                         new ArrayList<>(presetAdapter.getData());
-                                cur.add(r.body().getFoods().get(0));
-                                presetAdapter.updateData(cur);
+                                current.add(response.body().getFoods().get(0));
+                                presetAdapter.updateData(current);
                             }
                         }
 
                         @Override
-                        public void onFailure(@NonNull Call<FoodSearchResponse> c, @NonNull Throwable t) {
+                        public void onFailure(@NonNull Call<FoodSearchResponse> call, @NonNull Throwable t) {
                         }
                     });
         }
     }
 
+    // Open the NutritionDetailSheet for the chosen item (or null = custom).
     private void openDetail(FoodSearchResponse.FoodItem item) {
         NutritionDetailSheet.newInstance(item)
                 .show(getParentFragmentManager(), "NutritionDetail");

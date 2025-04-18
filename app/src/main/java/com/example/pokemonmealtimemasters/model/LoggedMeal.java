@@ -1,45 +1,28 @@
 package com.example.pokemonmealtimemasters.model;
 
-public class LoggedMeal
-{
-    private String name;
-    private double calories;
-    private long timestamp;
+/**
+ * Represents a meal logged by the user, storing its name, calorie count, and timestamp.
+ */
+public class LoggedMeal {
+    private final String name;
+    private final double calories;
+    private final long timestamp;
 
-    public LoggedMeal(String name, double calories, long timestamp)
-    {
-        this.name      = name;
-        this.calories  = calories;
+    public LoggedMeal(String name, double calories, long timestamp) {
+        this.name = name;
+        this.calories = calories;
         this.timestamp = timestamp;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
-    public double getCalories()
-    {
+    public double getCalories() {
         return calories;
     }
 
-    public void setCalories(double calories)
-    {
-        this.calories = calories;
-    }
-
-    public long getTimestamp()
-    {
+    public long getTimestamp() {
         return timestamp;
-    }
-
-    public void setTimestamp(long timestamp)
-    {
-        this.timestamp = timestamp;
     }
 }
