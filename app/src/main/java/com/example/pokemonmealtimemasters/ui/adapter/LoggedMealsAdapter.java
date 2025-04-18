@@ -7,7 +7,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.pokemonmealtimemasters.R;
-import com.example.pokemonmealtimemasters.model.LoggedMeal;
+import com.example.pokemonmealtimemasters.model.LoggedMealModel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -20,13 +20,13 @@ import java.util.Locale;
  */
 public class LoggedMealsAdapter extends RecyclerView.Adapter<LoggedMealsAdapter.ViewHolder> {
     public interface OnItemClickListener {
-        void onItemClick(LoggedMeal meal);
+        void onItemClick(LoggedMealModel meal);
     }
 
-    private List<LoggedMeal> data;
+    private List<LoggedMealModel> data;
     private OnItemClickListener listener;
 
-    public LoggedMealsAdapter(List<LoggedMeal> data) {
+    public LoggedMealsAdapter(List<LoggedMealModel> data) {
         this.data = data;
     }
 
@@ -35,7 +35,7 @@ public class LoggedMealsAdapter extends RecyclerView.Adapter<LoggedMealsAdapter.
     }
 
     // Updates the adapter's data and refreshes the entire list.
-    public void updateData(List<LoggedMeal> newData) {
+    public void updateData(List<LoggedMealModel> newData) {
         this.data = newData;
         notifyDataSetChanged();
     }
@@ -50,7 +50,7 @@ public class LoggedMealsAdapter extends RecyclerView.Adapter<LoggedMealsAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        LoggedMeal meal = data.get(position);
+        LoggedMealModel meal = data.get(position);
         holder.name.setText(meal.getName());
         holder.details.setText(
                 String.format(Locale.getDefault(),

@@ -5,10 +5,10 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Model for the FoodData Central search response.
+ * Data Model for the FoodData Central search response.
  * Contains a list of matching FoodItem entries.
  */
-public class FoodSearchResponse {
+public class FoodSearchResponseModel {
     @SerializedName("foods")
     private List<FoodItem> foods;
 

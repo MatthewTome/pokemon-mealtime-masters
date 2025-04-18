@@ -7,22 +7,22 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.pokemonmealtimemasters.R;
-import com.example.pokemonmealtimemasters.model.FoodSearchResponse;
+import com.example.pokemonmealtimemasters.model.FoodSearchResponseModel;
 import java.util.List;
 
 /**
  * Adapter for displaying a list of foods returned from the search API.
  * Each item shows the food description and notifies a listener when tapped.
  */
-public class MealAdapter extends RecyclerView.Adapter<MealAdapter.ViewHolder> {
+public class FoodSearchResponseAdapter extends RecyclerView.Adapter<FoodSearchResponseAdapter.ViewHolder> {
     public interface OnItemClickListener {
-        void onItemClick(FoodSearchResponse.FoodItem item);
+        void onItemClick(FoodSearchResponseModel.FoodItem item);
     }
 
-    private List<FoodSearchResponse.FoodItem> data;
+    private List<FoodSearchResponseModel.FoodItem> data;
     private OnItemClickListener listener;
 
-    public MealAdapter(List<FoodSearchResponse.FoodItem> data) {
+    public FoodSearchResponseAdapter(List<FoodSearchResponseModel.FoodItem> data) {
         this.data = data;
     }
 
@@ -30,11 +30,11 @@ public class MealAdapter extends RecyclerView.Adapter<MealAdapter.ViewHolder> {
         this.listener = listener;
     }
 
-    public List<FoodSearchResponse.FoodItem> getData() {
+    public List<FoodSearchResponseModel.FoodItem> getData() {
         return data;
     }
 
-    public void updateData(List<FoodSearchResponse.FoodItem> newData) {
+    public void updateData(List<FoodSearchResponseModel.FoodItem> newData) {
         this.data = newData;
         notifyDataSetChanged();
     }
@@ -49,7 +49,7 @@ public class MealAdapter extends RecyclerView.Adapter<MealAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        FoodSearchResponse.FoodItem item = data.get(position);
+        FoodSearchResponseModel.FoodItem item = data.get(position);
         holder.name.setText(item.getDescription());
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {

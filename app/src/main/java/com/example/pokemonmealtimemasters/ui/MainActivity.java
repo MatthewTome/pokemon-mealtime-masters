@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.pokemonmealtimemasters.R;
-import com.example.pokemonmealtimemasters.model.LoggedMeal;
+import com.example.pokemonmealtimemasters.model.LoggedMealModel;
 import com.example.pokemonmealtimemasters.ui.adapter.LoggedMealsAdapter;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearProgressIndicator progCarbs;
     private LinearProgressIndicator progVitamins;
 
-    private List<LoggedMeal> loggedMeals;
+    private List<LoggedMealModel> loggedMealModels;
     private LoggedMealsAdapter adapter;
 
     /**
@@ -85,16 +85,16 @@ public class MainActivity extends AppCompatActivity {
         // Restore logged meals list
         String json = prefs.getString(KEY_LOGGED_MEALS, "");
         if (json.isEmpty()) {
-            loggedMeals = new ArrayList<>();
+            loggedMealModels = new ArrayList<>();
         } else {
-            Type type = new TypeToken<List<LoggedMeal>>(){}.getType();
-            loggedMeals = gson.fromJson(json, type);
+            Type type = new TypeToken<List<LoggedMealModel>>(){}.getType();
+            loggedMealModels = gson.fromJson(json, type);
         }
 
         // RecyclerView for logged meals
         RecyclerView rv = findViewById(R.id.logged_meals_recycler);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new LoggedMealsAdapter(loggedMeals);
+        adapter = new LoggedMealsAdapter(loggedMealModels);
         rv.setAdapter(adapter);
 
         // Floating action button opens the meal logging sheet
@@ -115,11 +115,11 @@ public class MainActivity extends AppCompatActivity {
                     int    vit   = (int)bundle.getDouble("vitamins",0);
 
                     // Prepend and persist the new logged meal
-                    loggedMeals.add(0, new LoggedMeal(name, cal, System.currentTimeMillis()));
+                    loggedMealModels.add(0, new LoggedMealModel(name, cal, System.currentTimeMillis()));
                     prefs.edit()
-                            .putString(KEY_LOGGED_MEALS, gson.toJson(loggedMeals))
+                            .putString(KEY_LOGGED_MEALS, gson.toJson(loggedMealModels))
                             .apply();
-                    adapter.updateData(loggedMeals);
+                    adapter.updateData(loggedMealModels);
 
                     // Update and persist daily totals
                     dailyCalories    += cal;

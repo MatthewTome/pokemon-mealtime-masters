@@ -14,12 +14,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.pokemonmealtimemasters.BuildConfig;
 import com.example.pokemonmealtimemasters.R;
-import com.example.pokemonmealtimemasters.model.FoodSearchResponse;
-import com.example.pokemonmealtimemasters.model.LoggedMeal;
+import com.example.pokemonmealtimemasters.model.FoodSearchResponseModel;
+import com.example.pokemonmealtimemasters.model.LoggedMealModel;
 import com.example.pokemonmealtimemasters.network.ApiClient;
 import com.example.pokemonmealtimemasters.network.FoodDataService;
 import com.example.pokemonmealtimemasters.ui.adapter.LoggedMealsAdapter;
-import com.example.pokemonmealtimemasters.ui.adapter.MealAdapter;
+import com.example.pokemonmealtimemasters.ui.adapter.FoodSearchResponseAdapter;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -41,8 +41,8 @@ import retrofit2.Response;
  */
 public class MealLoggingSheet extends BottomSheetDialogFragment {
     private EditText searchInput;
-    private MealAdapter searchAdapter;
-    private MealAdapter presetAdapter;
+    private FoodSearchResponseAdapter searchAdapter;
+    private FoodSearchResponseAdapter presetAdapter;
     private FoodDataService service;
     private SharedPreferences prefs;
     private Gson gson;
@@ -88,7 +88,7 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
         Button searchButton = view.findViewById(R.id.search_button);
         RecyclerView searchRecycler = view.findViewById(R.id.search_results_recycler);
         searchRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
-        searchAdapter = new MealAdapter(new ArrayList<>());
+        searchAdapter = new FoodSearchResponseAdapter(new ArrayList<>());
         searchRecycler.setAdapter(searchAdapter);
         searchRecycler.setVisibility(View.GONE);
         searchAdapter.setOnItemClickListener(this::openDetail);
@@ -102,8 +102,8 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
             service.searchFood(query, BuildConfig.FDC_API_KEY)
                     .enqueue(new Callback<>() {
                         @Override
-                        public void onResponse(@NonNull Call<FoodSearchResponse> call,
-                                               @NonNull Response<FoodSearchResponse> response) {
+                        public void onResponse(@NonNull Call<FoodSearchResponseModel> call,
+                                               @NonNull Response<FoodSearchResponseModel> response) {
                             if (response.isSuccessful() && response.body() != null) {
                                 searchAdapter.updateData(response.body().getFoods());
                                 searchRecycler.setVisibility(View.VISIBLE);
@@ -113,7 +113,7 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
                         }
 
                         @Override
-                        public void onFailure(@NonNull Call<FoodSearchResponse> call, @NonNull Throwable t) {
+                        public void onFailure(@NonNull Call<FoodSearchResponseModel> call, @NonNull Throwable t) {
                             Toast.makeText(requireContext(), "Network error", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -132,8 +132,8 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
                 service.searchFood(meal.getName(), BuildConfig.FDC_API_KEY)
                         .enqueue(new Callback<>() {
                             @Override
-                            public void onResponse(@NonNull Call<FoodSearchResponse> call,
-                                                   @NonNull Response<FoodSearchResponse> response) {
+                            public void onResponse(@NonNull Call<FoodSearchResponseModel> call,
+                                                   @NonNull Response<FoodSearchResponseModel> response) {
                                 if (response.isSuccessful() && response.body() != null
                                         && !response.body().getFoods().isEmpty()) {
                                     openDetail(response.body().getFoods().get(0));
@@ -141,7 +141,7 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
                             }
 
                             @Override
-                            public void onFailure(@NonNull Call<FoodSearchResponse> call, @NonNull Throwable t) {
+                            public void onFailure(@NonNull Call<FoodSearchResponseModel> call, @NonNull Throwable t) {
                                 // no-op
                             }
                         })
@@ -150,7 +150,7 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
         // Preset options list
         RecyclerView presetRecycler = view.findViewById(R.id.recycler_preset);
         presetRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
-        presetAdapter = new MealAdapter(new ArrayList<>());
+        presetAdapter = new FoodSearchResponseAdapter(new ArrayList<>());
         presetRecycler.setAdapter(presetAdapter);
         presetAdapter.setOnItemClickListener(this::openDetail);
         loadPresetOptions();
@@ -165,11 +165,11 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
                 .setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
-    private List<LoggedMeal> loadLoggedMeals() {
+    private List<LoggedMealModel> loadLoggedMeals() {
         String json = prefs.getString(KEY_LOGGED_MEALS, "");
         if (json.isEmpty()) return new ArrayList<>();
-        Type type = new TypeToken<List<LoggedMeal>>(){}.getType();
-        List<LoggedMeal> all = gson.fromJson(json, type);
+        Type type = new TypeToken<List<LoggedMealModel>>(){}.getType();
+        List<LoggedMealModel> all = gson.fromJson(json, type);
         return all.size() <= 5 ? all : all.subList(0, 5);
     }
 
@@ -178,11 +178,11 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
             service.searchFood(query, BuildConfig.FDC_API_KEY)
                     .enqueue(new Callback<>() {
                         @Override
-                        public void onResponse(@NonNull Call<FoodSearchResponse> call,
-                                               @NonNull Response<FoodSearchResponse> response) {
+                        public void onResponse(@NonNull Call<FoodSearchResponseModel> call,
+                                               @NonNull Response<FoodSearchResponseModel> response) {
                             if (response.isSuccessful() && response.body() != null
                                     && !response.body().getFoods().isEmpty()) {
-                                List<FoodSearchResponse.FoodItem> current =
+                                List<FoodSearchResponseModel.FoodItem> current =
                                         new ArrayList<>(presetAdapter.getData());
                                 current.add(response.body().getFoods().get(0));
                                 presetAdapter.updateData(current);
@@ -190,14 +190,14 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
                         }
 
                         @Override
-                        public void onFailure(@NonNull Call<FoodSearchResponse> call, @NonNull Throwable t) {
+                        public void onFailure(@NonNull Call<FoodSearchResponseModel> call, @NonNull Throwable t) {
                         }
                     });
         }
     }
 
     // Open the NutritionDetailSheet for the chosen item (or null = custom).
-    private void openDetail(FoodSearchResponse.FoodItem item) {
+    private void openDetail(FoodSearchResponseModel.FoodItem item) {
         NutritionDetailSheet.newInstance(item)
                 .show(getParentFragmentManager(), "NutritionDetail");
         dismiss();

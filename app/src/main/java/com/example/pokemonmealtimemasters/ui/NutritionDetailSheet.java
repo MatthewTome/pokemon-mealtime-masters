@@ -10,7 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.example.pokemonmealtimemasters.R;
-import com.example.pokemonmealtimemasters.model.FoodSearchResponse;
+import com.example.pokemonmealtimemasters.model.FoodSearchResponseModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -25,7 +25,7 @@ import java.util.Objects;
  */
 public class NutritionDetailSheet extends BottomSheetDialogFragment {
     private static final String ARG_ITEM = "item";
-    private FoodSearchResponse.FoodItem item;
+    private FoodSearchResponseModel.FoodItem item;
 
     /**
      * Factory method to create a new instance of this sheet with an optional FoodItem.
@@ -33,7 +33,7 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
      * @return Configured NutritionDetailSheet instance
      */
     public static NutritionDetailSheet newInstance(
-            @Nullable FoodSearchResponse.FoodItem item
+            @Nullable FoodSearchResponseModel.FoodItem item
     ) {
         NutritionDetailSheet sheet = new NutritionDetailSheet();
         Bundle args = new Bundle();
@@ -49,7 +49,7 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         if (getArguments() != null) {
-            item = (FoodSearchResponse.FoodItem)
+            item = (FoodSearchResponseModel.FoodItem)
                     getArguments().getSerializable(ARG_ITEM);
         }
         return inflater.inflate(
@@ -149,10 +149,10 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
      * @return Nutrient value or 0 if not found
      */
     private double extract(
-            FoodSearchResponse.FoodItem it, String key
+            FoodSearchResponseModel.FoodItem it, String key
     ) {
         if (it.getFoodNutrients() == null) return 0;
-        for (FoodSearchResponse.FoodItem.FoodNutrient n :
+        for (FoodSearchResponseModel.FoodItem.FoodNutrient n :
                 it.getFoodNutrients()) {
             if (n.getNutrientName().equalsIgnoreCase(key)) {
                 return n.getValue();

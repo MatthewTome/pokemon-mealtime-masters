@@ -9,8 +9,8 @@
     <string name="servings">Servings (e.g. 1.5)</string>
     <string name="calories">Calories</string>
     <string name="protein_g">Protein (g)</string>
-    <string name="carbs">Carbs (g)</string>
-    <string name="vitamins">vitamins</string>
+    <string name="carbs">Carbs</string>
+    <string name="vitamins">Vitamins</string>
     <string name="settings">settings</string>
     <string name="reset_today">reset_today</string>
     <string name="vitamins_prompt" />
