@@ -38,8 +38,9 @@
                 android:autofillHints=""
                 android:hint="@string/search"
                 android:inputType="text"
-                android:textColorHint="@color/grey"
-                android:textColor="@android:color/black"/>
+                android:minHeight="48dp"
+                android:textColor="@android:color/black"
+                android:textColorHint="@color/grey" />
 
             <!-- Search Button -->
             <Button
