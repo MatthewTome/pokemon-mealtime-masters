@@ -45,12 +45,19 @@ public class FoodSearchResponseModel {
             @SerializedName("value")
             private double value;
 
+            @SerializedName("unitName")
+            private String unitName;      // ← new
+
             public String getNutrientName() {
                 return nutrientName;
             }
 
             public double getValue() {
                 return value;
+            }
+
+            public String getUnitName() {
+                return unitName;
             }
         }
     }

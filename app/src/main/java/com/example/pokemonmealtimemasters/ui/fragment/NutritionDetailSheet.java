@@ -20,8 +20,8 @@ import java.util.Objects;
 
 /**
  * Bottom sheet for displaying and editing the nutritional details of a selected food item.
- * Supports pre-populating values from the FoodData Central API or leaving fields blank
- * for custom input. On submission, returns the computed nutrient totals back to MainActivity.
+ * Converts any kJ to kcal, displays the value in the calories field with a 'kcal' suffix,
+ * and leaves protein/carbs blank or prefilled.
  */
 public class NutritionDetailSheet extends BottomSheetDialogFragment {
     private static final String ARG_ITEM = "item";
@@ -75,18 +75,17 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
         TextInputEditText editCarbs    = view.findViewById(R.id.edit_carbs);
         MaterialButton   btnAdd        = view.findViewById(R.id.button_add_meal);
 
-        // Prefill with one serving if a FoodItem is provided
         if (item != null) {
             editServings.setText("1");
-            editCalories.setText(
-                    String.valueOf((int) extract(item, "Energy"))
-            );
-            editProtein.setText(
-                    String.valueOf((int) extract(item, "Protein"))
-            );
-            editCarbs.setText(
-                    String.valueOf((int) extract(item, "Carbs"))
-            );
+            // extract Energy: if unit is kJ, convert to kcal
+            double rawEnergy = extract(item, "Energy");
+            editCalories.setText(String.valueOf((int) rawEnergy));
+
+            double rawProt = extract(item, "Protein");
+            editProtein.setText(String.valueOf((int) rawProt));
+
+            double rawCarb = extract(item, "Carbs");
+            editCarbs.setText(String.valueOf((int) rawCarb));
         }
 
         // Handle the Add Meal click: calculate totals and return result
@@ -143,19 +142,18 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
     }
 
     /**
-     * Helper to extract nutrient values by name from the FoodItem.
-     * @param it The FoodItem
-     * @param key Nutrient name to look up (e.g., "Energy")
-     * @return Nutrient value or 0 if not found
+     * Finds the named nutrient in the FoodItem. If that nutrient’s unit is kJ, converts it to kcal.
      */
-    private double extract(
-            FoodSearchResponseModel.FoodItem it, String key
-    ) {
+    private double extract(FoodSearchResponseModel.FoodItem it, String key) {
         if (it.getFoodNutrients() == null) return 0;
-        for (FoodSearchResponseModel.FoodItem.FoodNutrient n :
-                it.getFoodNutrients()) {
+        for (FoodSearchResponseModel.FoodItem.FoodNutrient n : it.getFoodNutrients()) {
             if (n.getNutrientName().equalsIgnoreCase(key)) {
-                return n.getValue();
+                double v = n.getValue();
+                String unit = n.getUnitName();
+                if (unit != null && unit.equalsIgnoreCase("kJ")) {
+                    return v / 4.184;  // convert kilojoules to kilocalories
+                }
+                return v;  // already in kcal
             }
         }
         return 0;
