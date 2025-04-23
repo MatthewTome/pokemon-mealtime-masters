@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.material)
     implementation(libs.gson)
+    implementation(libs.coil)
 
     // Network dependencies for FoodData Central API integration
     implementation(libs.retrofit)

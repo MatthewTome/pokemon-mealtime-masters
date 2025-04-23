@@ -13,6 +13,8 @@ import com.example.pokemonmealtimemasters.R;
 import com.example.pokemonmealtimemasters.model.LoggedMealModel;
 import com.example.pokemonmealtimemasters.ui.adapter.LoggedMealsAdapter;
 import com.example.pokemonmealtimemasters.ui.fragment.MealLoggingSheet;
+import com.example.pokemonmealtimemasters.ui.fragment.RewardSheet;
+import com.example.pokemonmealtimemasters.utils.RewardEngine;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
@@ -134,6 +136,10 @@ public class MainActivity extends AppCompatActivity {
                             .putInt  (KEY_DAILY_VITAMIN,   dailyVitaminCount)
                             .apply();
                     updateProgressBars();
+
+                    String buddyKey = RewardEngine.computeReward(cal, prot, carbs);
+                    RewardSheet.newInstance(buddyKey)
+                            .show(getSupportFragmentManager(), "RewardSheet");
                 }
         );
     }
