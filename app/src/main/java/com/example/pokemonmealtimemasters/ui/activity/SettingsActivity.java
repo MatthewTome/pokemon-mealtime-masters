@@ -1,4 +1,4 @@
-package com.example.pokemonmealtimemasters.ui;
+package com.example.pokemonmealtimemasters.ui.activity;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;

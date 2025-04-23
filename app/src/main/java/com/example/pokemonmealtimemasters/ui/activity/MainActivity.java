@@ -1,4 +1,4 @@
-package com.example.pokemonmealtimemasters.ui;
+package com.example.pokemonmealtimemasters.ui.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.pokemonmealtimemasters.R;
 import com.example.pokemonmealtimemasters.model.LoggedMealModel;
 import com.example.pokemonmealtimemasters.ui.adapter.LoggedMealsAdapter;
+import com.example.pokemonmealtimemasters.ui.fragment.MealLoggingSheet;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;

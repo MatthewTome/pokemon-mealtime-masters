@@ -1,4 +1,4 @@
-package com.example.pokemonmealtimemasters.ui;
+package com.example.pokemonmealtimemasters.ui.fragment;
 
 import android.app.Dialog;
 import android.os.Bundle;
