@@ -17,6 +17,7 @@ constraintlayout = "2.2.1"
 materialComponents = "1.12.0"
 gson = '2.10.1'
 coil = "2.3.0"
+volley = "1.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +43,8 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "materialComponents" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+volley = { group = "com.android.volley", name = "volley", version = "1.2.1" }
+android-volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

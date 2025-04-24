@@ -1,19 +1,18 @@
 package com.example.pokemonmealtimemasters.ui.activity;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.pokemonmealtimemasters.R;
-import com.example.pokemonmealtimemasters.model.PokemonModel;
 import com.example.pokemonmealtimemasters.ui.adapter.PokemonAdapter;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Hosts the “My Pokédex” screen, showing all Pokémon the user
@@ -22,8 +21,6 @@ import java.util.List;
  * lets the user tap back to return to MainActivity.
  */
 public class PokedexActivity extends AppCompatActivity {
-    private static final String PREFS_NAME           = "prefs";
-    private static final String KEY_CAUGHT_POKEMON   = "caught_pokemon";
 
     private SharedPreferences prefs;
 
@@ -32,29 +29,40 @@ public class PokedexActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pokedex);
 
-        MaterialToolbar toolbar = findViewById(R.id.top_app_bar);
-        setSupportActionBar(toolbar);
+        prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+
+        // Toolbar setup for back navigation
+        MaterialToolbar toolbar = findViewById(R.id.pokedex_toolbar);
+        toolbar.setTitle("My Pokédex");
+        toolbar.setTitleTextColor(Color.BLACK);
         toolbar.setNavigationOnClickListener(v -> finish());
+        toolbar.setNavigationOnClickListener(v -> finish()); // returns to MainActivity
 
-        prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        List<PokemonModel> caughtList = loadCaughtPokemon();
-
-        RecyclerView pokedexRecycler = findViewById(R.id.recycler_pokedex);
-        pokedexRecycler.setLayoutManager(new GridLayoutManager(this, 2));
-        PokemonAdapter adapter = new PokemonAdapter(caughtList);
-        pokedexRecycler.setAdapter(adapter);
+        RecyclerView recyclerView = findViewById(R.id.pokedexRecycler);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
     }
 
-    /**
-     * Reads the JSON-serialized list of PokemonModel from prefs.
-     * If none exists yet, returns an empty list.
-     */
-    private List<PokemonModel> loadCaughtPokemon() {
-        String json = prefs.getString(KEY_CAUGHT_POKEMON, "");
-        if (json.isEmpty()) {
-            return new ArrayList<>();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshPokedex();
+    }
+
+    private void refreshPokedex() {
+        RecyclerView recyclerView = findViewById(R.id.pokedexRecycler);
+
+        Set<String> caughtPokemonIds = prefs.getStringSet("caught_pokemon_ids", new HashSet<>());
+        List<String> allPokemonIds = getAllPokemonIds();
+
+        PokemonAdapter adapter = new PokemonAdapter(allPokemonIds, caughtPokemonIds, this);
+        recyclerView.setAdapter(adapter);
+    }
+
+    private List<String> getAllPokemonIds() {
+        List<String> ids = new ArrayList<>();
+        for (int i = 1; i <= 151; i++) {
+            ids.add(String.valueOf(i));
         }
-        Type type = new TypeToken<List<PokemonModel>>(){}.getType();
-        return new Gson().fromJson(json, type);
+        return ids;
     }
 }

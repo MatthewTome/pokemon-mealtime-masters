@@ -1,6 +1,8 @@
 package com.example.pokemonmealtimemasters.ui.activity;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +14,7 @@ import com.example.pokemonmealtimemasters.ui.adapter.LoggedMealsAdapter;
 import com.example.pokemonmealtimemasters.ui.fragment.MealLoggingSheet;
 import com.example.pokemonmealtimemasters.ui.fragment.RewardSheet;
 import com.example.pokemonmealtimemasters.utils.RewardEngine;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.gson.Gson;
@@ -22,6 +25,8 @@ import java.util.List;
 import coil.Coil;
 import coil.ImageLoader;
 import coil.request.ImageRequest;
+import java.util.Set;
+import java.util.HashSet;
 
 public class MainActivity extends AppCompatActivity {
     private static final String PREFS                = "prefs";
@@ -138,8 +143,17 @@ public class MainActivity extends AppCompatActivity {
                             .apply();
                     updateProgressBars();
 
-                    // compute and persist the new Pokémon reward
-                    String pokedexId = RewardEngine.computeReward(cal, prot, carbs);
+                    // Load existing caught Pokémon
+                    Set<String> caughtPokemonIds = prefs.getStringSet("caught_pokemon_ids", new HashSet<>());
+
+                    // compute the Pokémon reward ensuring uniqueness
+                    String pokedexId = RewardEngine.computeReward(cal, prot, carbs, caughtPokemonIds);
+
+                    // add the new Pokémon to the caught set
+                    caughtPokemonIds.add(pokedexId);
+                    prefs.edit().putStringSet("caught_pokemon_ids", caughtPokemonIds).apply();
+
+                    // persist last Pokémon
                     prefs.edit().putString(KEY_LAST_POKEMON, pokedexId).apply();
 
                     // immediately reload its sprite
@@ -158,24 +172,18 @@ public class MainActivity extends AppCompatActivity {
                             .show(getSupportFragmentManager(), "RewardSheet");
                 }
         );
+
+        MaterialToolbar toolbar = findViewById(R.id.top_app_bar);
+        toolbar.setTitle(getString(R.string.title)); // explicitly set your MainActivity title here
+        toolbar.setTitleTextColor(Color.BLACK);
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_pokedex) {
+                startActivity(new Intent(MainActivity.this, PokedexActivity.class));
+                return true;
+            }
+            return false;
+        });
     }
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate your main_menu.xml so the pokédex icon appears at runtime
-//        new MenuInflater(this).inflate(R.menu.main_menu, menu);
-//        return true;
-//    }
-
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // handle pokédex tap
-//        if (item.getItemId() == R.id.action_pokedex) {
-//            startActivity(new Intent(this, PokedexActivity.class));
-//            return true;
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
 
     private void updateProgressBars() {
         progCalories.setProgress((int)(dailyCalories/2000f*100), true);
