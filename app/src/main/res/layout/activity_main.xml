@@ -13,14 +13,8 @@
         android:layout_height="?attr/actionBarSize"
         android:backgroundTint="@android:color/transparent"
         android:title="@string/title"
-        android:titleTextColor="@android:color/black" />
-
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+        android:titleTextColor="@android:color/black"
+        app:menu="@menu/main_menu"/>
 
     <!-- Scrollable content under the AppBar -->
     <ScrollView
@@ -43,13 +37,13 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Top Bunny Icon -->
                 <ImageView
+                    android:id="@+id/image_pokemon_sprite"
                     android:layout_width="72dp"
                     android:layout_height="72dp"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_placeholder"
-                    android:contentDescription="@string/buddy_icon"/>
+                    android:contentDescription="@string/pokemon_sprite"/>
 
                 <!-- Title -->
                 <TextView
@@ -292,11 +286,12 @@
         app:layout_anchorGravity="center"
         android:layout_marginBottom="16dp"/>
 
-    <!-- Bottom App Bar (just for placement of FAB) -->
+    <!-- Bottom App Bar  -->
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottom_app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         app:fabAlignmentMode="center"/>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

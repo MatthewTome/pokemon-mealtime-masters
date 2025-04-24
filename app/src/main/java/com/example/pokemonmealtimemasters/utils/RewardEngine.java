@@ -14,13 +14,13 @@ public class RewardEngine {
     public static String computeReward(double calories, double protein, double carbs) {
         // a small set of example rules:
         if (calories <= 300 && protein >= 15 && carbs <= 40) {
-            return "pikachu";
+            return "25";
         } else if (protein >= 20) {
-            return "charmander";
+            return "4";
         } else if (carbs <= 30) {
-            return "squirtle";
+            return "7";
         } else {
-            return "bulbasaur";
+            return "1";
         }
     }
 }
