@@ -60,6 +60,19 @@
                 android:text="@string/custom_food"
                 android:layout_marginTop="12dp"/>
 
+            <!-- Tips -->
+            <TextView
+                android:id="@+id/text_nutrition_tip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tip: High-protein meals may attract Fighting-type Pokémon!"
+                android:textSize="14sp"
+                android:textColor="@android:color/black"
+                android:padding="8dp"
+                android:background="@color/cardview_light_background"
+                android:gravity="center_horizontal"/>
+
+
             <!-- Search Results -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/search_results_recycler"

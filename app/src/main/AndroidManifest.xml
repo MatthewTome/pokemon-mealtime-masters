@@ -25,9 +25,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activity.SettingsActivity"
-            android:parentActivityName=".ui.activity.MainActivity">
-        </activity>
         <activity android:name=".ui.activity.PokedexActivity" />
     </application>
 </manifest>

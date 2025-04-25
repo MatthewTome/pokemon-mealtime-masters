@@ -1,5 +1,6 @@
 package com.example.pokemonmealtimemasters.utils;
 
+import android.content.Context;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,33 +9,82 @@ import java.util.Set;
 
 /**
  * Simple rule-based engine that assigns a Pokémon “buddy” key
- * based on the calorie, protein, and carb content of a meal.
+ * based on the calorie, protein, carb, and vitamin content of a meal.
+ * <p>
+ * Type-aware: pulls current Fighting/Psychic rosters from PokeAPI at runtime
+ * (cached for the session in {@link com.example.pokemonmealtimemasters.network.PokemonTypeRepository}).
  */
-public class RewardEngine {
+public class RewardEngine
+{
+    // Starters + Pikachu stay hard-coded as the “balanced” reward pool
+    private static final List<String> BALANCED_REWARDS = Arrays.asList("1", "4", "7", "10", "25");
 
-    private static final List<String> LEGENDARY_IDS = Arrays.asList("144", "145", "146", "150", "151");
+    /**
+     * Computes the Pokédex-ID (as a String) of the reward the user should receive.
+     *
+     * @param context  any Android context (used only for cached PokeAPI networking)
+     * @param calories meal calories
+     * @param protein  meal protein (g)
+     * @param carbs    meal carbohydrates (g)
+     * @param vitamins vitamin “score”
+     * @param caught   already-owned Pokémon IDs so we don’t repeat rewards
+     *
+     * @return Pokédex ID of the reward, or <code>null</code> if no reward
+     */
+    public static String computeReward(
+            Context context,
+            double calories,
+            double protein,
+            double carbs,
+            double vitamins,
+            Set<String> caught)
+    {
+        if (!isNutritious(calories, protein, carbs, vitamins))
+        {
+            return null;     // No reward if meal fails nutrition gate
+        }
 
-    public static String computeReward(double cal, double prot, double carbs, Set<String> caughtPokemonIds) {
-        List<String> availablePokemon = new ArrayList<>();
+        List<String> pool = new ArrayList<>();
+        var repo = com.example.pokemonmealtimemasters.network.PokemonTypeRepository
+                .getInstance(context);
 
-        for (int i = 1; i <= 151; i++) {
-            String id = String.valueOf(i);
-            if (!caughtPokemonIds.contains(id)) {
-                if (LEGENDARY_IDS.contains(id)) {
-                    if (caughtPokemonIds.size() >= 50) { // Example threshold
-                        availablePokemon.add(id); // Legendary unlocked after catching 50 Pokémon
-                    }
-                } else {
-                    availablePokemon.add(id);
-                }
+        if (protein >= 10)
+        {
+            pool.addAll(repo.getIdsForType("fighting"));
+        }
+
+        if (vitamins >= 1)
+        {
+            pool.addAll(repo.getIdsForType("psychic"));
+        }
+
+        if (protein >= 1 && carbs >= 1)
+        {
+            pool.addAll(BALANCED_REWARDS);
+            for (int i = 1; i <= 151; i++)
+            {
+                pool.add(String.valueOf(i));
             }
         }
 
-        if (availablePokemon.isEmpty()) {
-            return "1"; // default fallback Pokémon if all caught
+        // Avoid duplicates + randomise
+        pool.removeAll(caught);
+
+        if (pool.isEmpty())
+        {
+            return null;
         }
 
-        Collections.shuffle(availablePokemon);
-        return availablePokemon.get(0);
+        Collections.shuffle(pool);
+        return pool.get(0);
+    }
+
+    private static boolean isNutritious(
+            double calories,
+            double protein,
+            double carbs,
+            double vitamins)
+    {
+        return calories >= 100 && (protein > 5 || carbs > 5 || vitamins > 5);
     }
 }

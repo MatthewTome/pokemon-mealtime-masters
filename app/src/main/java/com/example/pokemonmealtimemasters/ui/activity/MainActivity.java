@@ -8,6 +8,8 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import coil.Coil;
+import coil.request.ImageRequest;
 import com.example.pokemonmealtimemasters.R;
 import com.example.pokemonmealtimemasters.model.LoggedMealModel;
 import com.example.pokemonmealtimemasters.ui.adapter.LoggedMealsAdapter;
@@ -21,21 +23,22 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.List;
-import coil.Coil;
-import coil.ImageLoader;
-import coil.request.ImageRequest;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class MainActivity extends AppCompatActivity {
-    private static final String PREFS                = "prefs";
-    private static final String KEY_LOGGED_MEALS     = "logged_meals";
-    private static final String KEY_DAILY_CALORIES   = "daily_calories";
-    private static final String KEY_DAILY_PROTEIN    = "daily_protein";
-    private static final String KEY_DAILY_CARBS      = "daily_carbs";
-    private static final String KEY_DAILY_VITAMINS   = "daily_vitamins";
-    private static final String KEY_LAST_POKEMON     = "last_pokemon";
+public class MainActivity extends AppCompatActivity
+{
+    private static final String PREFS              = "prefs";
+    private static final String KEY_LOGGED_MEALS   = "logged_meals";
+    private static final String KEY_DAILY_CALORIES = "daily_calories";
+    private static final String KEY_DAILY_PROTEIN  = "daily_protein";
+    private static final String KEY_DAILY_CARBS    = "daily_carbs";
+    private static final String KEY_DAILY_VITAMINS = "daily_vitamins";
+    private static final String KEY_LAST_POKEMON   = "last_pokemon";
+    private static final String KEY_CAUGHT_SET     = "caught_pokemon_ids";
 
     private SharedPreferences prefs;
     private Gson gson;
@@ -52,37 +55,38 @@ public class MainActivity extends AppCompatActivity {
 
     private List<LoggedMealModel> loggedMealModels;
     private LoggedMealsAdapter adapter;
+    private final ExecutorService rewardExecutor = Executors.newSingleThreadExecutor();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // preferences & JSON helper
         prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
         gson  = new Gson();
 
-        // show the last earned Pokémon sprite
+        // Last caught Pokemon
         ImageView sprite = findViewById(R.id.image_pokemon_sprite);
         String lastId = prefs.getString(KEY_LAST_POKEMON, null);
-        if (lastId != null) {
+        if (lastId != null)
+        {
             String url = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/"
                     + lastId + ".png";
-            ImageLoader loader = Coil.imageLoader(this);
-            ImageRequest req = new ImageRequest.Builder(this)
-                    .data(url)
-                    .placeholder(R.drawable.ic_placeholder)
-                    .crossfade(true)
-                    .target(sprite)
-                    .build();
-            loader.enqueue(req);
+            Coil.imageLoader(this)
+                    .enqueue(new ImageRequest.Builder(this)
+                            .data(url)
+                            .placeholder(R.drawable.ic_placeholder)
+                            .crossfade(true)
+                            .target(sprite)
+                            .build());
         }
 
-        // load daily progress totals
-        dailyCalories    = prefs.getFloat(KEY_DAILY_CALORIES, 0f);
-        dailyProtein     = prefs.getFloat(KEY_DAILY_PROTEIN,  0f);
-        dailyCarbs       = prefs.getFloat(KEY_DAILY_CARBS,    0f);
-        dailyVitaminCount= prefs.getInt(KEY_DAILY_VITAMINS,  0);
+        // Daily progress
+        dailyCalories     = prefs.getFloat(KEY_DAILY_CALORIES, 0f);
+        dailyProtein      = prefs.getFloat(KEY_DAILY_PROTEIN,  0f);
+        dailyCarbs        = prefs.getFloat(KEY_DAILY_CARBS,    0f);
+        dailyVitaminCount = prefs.getInt  (KEY_DAILY_VITAMINS, 0);
 
         progCalories = findViewById(R.id.prog_calories);
         progProtein  = findViewById(R.id.prog_protein);
@@ -90,12 +94,15 @@ public class MainActivity extends AppCompatActivity {
         progVitamins = findViewById(R.id.prog_vitamins);
         updateProgressBars();
 
-        // restore the list of today's logged meals
+        // Last-logged meal
         String json = prefs.getString(KEY_LOGGED_MEALS, "");
-        if (json.isEmpty()) {
+        if (json.isEmpty())
+        {
             loggedMealModels = new ArrayList<>();
-        } else {
-            Type t = new TypeToken<List<LoggedMealModel>>(){}.getType();
+        }
+        else
+        {
+            Type t = new TypeToken<List<LoggedMealModel>>() {}.getType();
             loggedMealModels = gson.fromJson(json, t);
         }
 
@@ -104,80 +111,91 @@ public class MainActivity extends AppCompatActivity {
         adapter = new LoggedMealsAdapter(loggedMealModels);
         rv.setAdapter(adapter);
 
-        // FAB opens the meal-logging sheet
+        // FAB opens meal logging sheet
         FloatingActionButton fab = findViewById(R.id.fab_add_meal);
         fab.setOnClickListener(v ->
                 new MealLoggingSheet()
-                        .show(getSupportFragmentManager(), "MealLoggingSheet")
-        );
+                        .show(getSupportFragmentManager(), "MealLoggingSheet"));
 
-        // listen for the result from the detail sheet
+        // Listen for new meal results
         getSupportFragmentManager().setFragmentResultListener(
                 "meal_logged", this,
-                (key, bundle) -> {
-                    String name  = bundle.getString("name","Custom");
-                    double cal   = bundle.getDouble("calories",0);
-                    double prot  = bundle.getDouble("protein",0);
-                    double carbs = bundle.getDouble("carbs",0);
-                    int    vit   = (int)bundle.getDouble("vitamins",0);
+                (key, bundle) ->
+                {
+                    // Meal data
+                    String name  = bundle.getString("name", "Custom");
+                    double cal   = bundle.getDouble("calories", 0);
+                    double prot  = bundle.getDouble("protein",  0);
+                    double carbs = bundle.getDouble("carbs",    0);
+                    int    vit   = (int) bundle.getDouble("vitamins", 0);
 
-                    // prepend and save the new meal
-                    loggedMealModels.add(0,
-                            new LoggedMealModel(name, cal, System.currentTimeMillis())
-                    );
+                    loggedMealModels.add(0, new LoggedMealModel(name, cal, System.currentTimeMillis()));
                     prefs.edit()
                             .putString(KEY_LOGGED_MEALS, gson.toJson(loggedMealModels))
                             .apply();
                     adapter.updateData(loggedMealModels);
 
-                    // update totals and persist
-                    dailyCalories    += cal;
-                    dailyProtein     += prot;
-                    dailyCarbs       += carbs;
-                    dailyVitaminCount= Math.min(100, dailyVitaminCount + vit);
+                    // Update progress totals
+                    dailyCalories     += cal;
+                    dailyProtein      += prot;
+                    dailyCarbs        += carbs;
+                    dailyVitaminCount = Math.min(100, dailyVitaminCount + vit);
                     prefs.edit()
-                            .putFloat(KEY_DAILY_CALORIES, (float)dailyCalories)
-                            .putFloat(KEY_DAILY_PROTEIN,  (float)dailyProtein)
-                            .putFloat(KEY_DAILY_CARBS,    (float)dailyCarbs)
+                            .putFloat(KEY_DAILY_CALORIES, (float) dailyCalories)
+                            .putFloat(KEY_DAILY_PROTEIN,  (float) dailyProtein)
+                            .putFloat(KEY_DAILY_CARBS,    (float) dailyCarbs)
                             .putInt  (KEY_DAILY_VITAMINS, dailyVitaminCount)
                             .apply();
                     updateProgressBars();
 
-                    // Load existing caught Pokémon
-                    Set<String> caughtPokemonIds = prefs.getStringSet("caught_pokemon_ids", new HashSet<>());
+                    Set<String> caught = new HashSet<>(
+                            prefs.getStringSet(KEY_CAUGHT_SET, new HashSet<>()));
 
-                    // compute the Pokémon reward ensuring uniqueness
-                    String pokedexId = RewardEngine.computeReward(cal, prot, carbs, caughtPokemonIds);
+                    // Compute rewards
+                    rewardExecutor.execute(() ->
+                    {
+                        String pokedexId = RewardEngine.computeReward(
+                                MainActivity.this, cal, prot, carbs, vit, caught);
 
-                    // add the new Pokémon to the caught set
-                    caughtPokemonIds.add(pokedexId);
-                    prefs.edit().putStringSet("caught_pokemon_ids", caughtPokemonIds).apply();
+                        if (pokedexId == null)
+                        {
+                            return;     // no reward this time
+                        }
 
-                    // persist last Pokémon
-                    prefs.edit().putString(KEY_LAST_POKEMON, pokedexId).apply();
+                        runOnUiThread(() ->
+                        {
+                            caught.add(pokedexId);
+                            prefs.edit()
+                                    .putString(KEY_LAST_POKEMON, pokedexId)
+                                    .putStringSet(KEY_CAUGHT_SET, caught)
+                                    .apply();
 
-                    // immediately reload its sprite
-                    String newUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/"
-                            + pokedexId + ".png";
-                    ImageRequest reloadReq = new ImageRequest.Builder(this)
-                            .data(newUrl)
-                            .placeholder(R.drawable.ic_placeholder)
-                            .crossfade(true)
-                            .target(sprite)
-                            .build();
-                    Coil.imageLoader(this).enqueue(reloadReq);
+                            // Sprite refresh
+                            String newUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/"
+                                    + pokedexId + ".png";
+                            Coil.imageLoader(MainActivity.this)
+                                    .enqueue(new ImageRequest.Builder(MainActivity.this)
+                                            .data(newUrl)
+                                            .placeholder(R.drawable.ic_placeholder)
+                                            .crossfade(true)
+                                            .target(sprite)
+                                            .build());
 
-                    // show the celebration sheet
-                    RewardSheet.newInstance(pokedexId)
-                            .show(getSupportFragmentManager(), "RewardSheet");
-                }
-        );
+                            // Reward Sheet
+                            RewardSheet.newInstance(pokedexId)
+                                    .show(getSupportFragmentManager(), "RewardSheet");
+                        });
+                    });
+                });
 
+        // Toolbar
         MaterialToolbar toolbar = findViewById(R.id.top_app_bar);
-        toolbar.setTitle(getString(R.string.title)); // explicitly set your MainActivity title here
+        toolbar.setTitle(getString(R.string.title));
         toolbar.setTitleTextColor(Color.BLACK);
-        toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_pokedex) {
+        toolbar.setOnMenuItemClickListener(item ->
+        {
+            if (item.getItemId() == R.id.action_pokedex)
+            {
                 startActivity(new Intent(MainActivity.this, PokedexActivity.class));
                 return true;
             }
@@ -185,10 +203,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void updateProgressBars() {
-        progCalories.setProgress((int)(dailyCalories/2000f*100), true);
-        progProtein .setProgress((int)(dailyProtein/50f*100),   true);
-        progCarbs   .setProgress((int)(dailyCarbs/30f*100),     true);
-        progVitamins.setProgress(dailyVitaminCount,             true);
+    private void updateProgressBars()
+    {
+        progCalories.setProgress((int) (dailyCalories / 2000f * 100), true);
+        progProtein .setProgress((int) (dailyProtein  / 50f   * 100), true);
+        progCarbs   .setProgress((int) (dailyCarbs    / 30f   * 100), true);
+        progVitamins.setProgress(dailyVitaminCount,                     true);
     }
 }

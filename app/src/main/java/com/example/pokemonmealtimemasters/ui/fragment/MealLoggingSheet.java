@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,6 +30,8 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -82,6 +85,16 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
         service = ApiClient.getClient(requireContext()).create(FoodDataService.class);
         prefs   = requireContext().getSharedPreferences(PREFS_NAME, 0);
         gson    = new Gson();
+
+        // Nutrition tips
+        String[] tips = {
+                "Tip: High-protein meals may attract Fighting-type Pokémon!",
+                "Tip: Vitamin-rich meals may attract Psychic-type Pokémon!",
+                "Tip: Balanced meals might reward you with rare Pokémon!",
+                "Tip: Junk food won’t earn rewards. Eat nutritious foods!"
+        };
+        TextView tipText = view.findViewById(R.id.text_nutrition_tip);
+        tipText.setText(tips[new Random().nextInt(tips.length)]);
 
         // Search section
         searchInput   = view.findViewById(R.id.search_input);
