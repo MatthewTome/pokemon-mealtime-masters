@@ -6,21 +6,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.example.pokemonmealtimemasters.R;
 import com.example.pokemonmealtimemasters.network.PokeApiService;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-
 import coil.ImageLoader;
 import coil.request.ImageRequest;
 
@@ -30,8 +26,8 @@ import coil.request.ImageRequest;
  * high-res “official-artwork” sprite from GitHub’s sprite repo.
  */
 public class RewardSheet extends BottomSheetDialogFragment {
-    private static final String ARG_ID = "buddy_key";
-    private String buddyKey; // this should be the numeric ID as a string
+    private static final String ARG_ID = "pokemon_id";
+    private String pokemonId;
 
     public static RewardSheet newInstance(String buddyKey) {
         RewardSheet sheet = new RewardSheet();
@@ -46,7 +42,7 @@ public class RewardSheet extends BottomSheetDialogFragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         if (getArguments() != null) {
-            buddyKey = getArguments().getString(ARG_ID);
+            pokemonId = getArguments().getString(ARG_ID);
         }
         return inflater.inflate(R.layout.sheet_reward, container, false);
     }
@@ -59,18 +55,18 @@ public class RewardSheet extends BottomSheetDialogFragment {
 
         title.setText(R.string.reward_title); // “You caught a new Pokémon!”
 
-        // 1) set up Retrofit just to fetch the name
+        // Set up Retrofit just to fetch the name
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://pokeapi.co/api/v2/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         PokeApiService api = retrofit.create(PokeApiService.class);
-        api.getPokemon(buddyKey).enqueue(new Callback<>() {
+        api.getPokemon(pokemonId).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<PokeApiService.Pokemon> call,
                                    @NonNull Response<PokeApiService.Pokemon> resp) {
-                String displayName = buddyKey;
+                String displayName = pokemonId;
                 if (resp.isSuccessful() && resp.body() != null) {
                     String name = resp.body().name;
                     // capitalize first letter
@@ -78,13 +74,13 @@ public class RewardSheet extends BottomSheetDialogFragment {
                 }
                 title.setText(getString(R.string.reward_caught_format, displayName));
 
-                // 2) build the high-res official artwork URL
+                // Build the high-res official artwork URL
                 String artUrl =
                         "https://raw.githubusercontent.com/PokeAPI/sprites/master/" +
                                 "sprites/pokemon/other/official-artwork/" +
-                                buddyKey + ".png";
+                                pokemonId + ".png";
 
-                // 3) load with Coil
+                // Load with Coil
                 ImageLoader loader = new ImageLoader.Builder(requireContext()).build();
                 ImageRequest req = new ImageRequest.Builder(requireContext())
                         .data(artUrl)
@@ -99,7 +95,7 @@ public class RewardSheet extends BottomSheetDialogFragment {
             public void onFailure(@NonNull Call<PokeApiService.Pokemon> call,
                                   @NonNull Throwable t) {
                 // fallback: just show ID in the title, and a placeholder image
-                title.setText(getString(R.string.reward_caught_format, buddyKey));
+                title.setText(getString(R.string.reward_caught_format, pokemonId));
                 image.setImageResource(R.drawable.ic_placeholder);
             }
         });

@@ -2,10 +2,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!-- Pokédex -->
     <item
         android:id="@+id/action_pokedex"
         android:icon="@drawable/ic_pokedex"
         android:title="@string/pokedex"
-        app:showAsAction="always" />
+        android:orderInCategory="0"
+        app:showAsAction="ifRoom" />
 
+    <!-- Badges -->
+    <item
+        android:id="@+id/action_badges"
+        android:icon="@drawable/ic_placeholder"
+        android:title="@string/badges"
+        android:orderInCategory="1"
+        app:showAsAction="ifRoom" />
 </menu>

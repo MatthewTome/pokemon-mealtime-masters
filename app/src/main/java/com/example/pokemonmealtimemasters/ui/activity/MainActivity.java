@@ -29,6 +29,10 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Hosts the “Home” screen, displaying the user's meals for the day,
+ * as well as the daily progress bars with nutrition info.
+ */
 public class MainActivity extends AppCompatActivity
 {
     private static final String PREFS              = "prefs";
@@ -197,6 +201,11 @@ public class MainActivity extends AppCompatActivity
             if (item.getItemId() == R.id.action_pokedex)
             {
                 startActivity(new Intent(MainActivity.this, PokedexActivity.class));
+                return true;
+            }
+            else if (item.getItemId() == R.id.action_badges)
+            {
+                startActivity(new Intent(this, BadgesActivity.class));
                 return true;
             }
             return false;

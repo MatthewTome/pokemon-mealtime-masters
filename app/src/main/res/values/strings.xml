@@ -21,7 +21,7 @@
     <string name="other_food_options">Other Food Options</string>
     <string name="most_recent">Most Recent</string>
     <string name="carbs_g">Carbs (g)</string>
-    <string name="buddy_icon">Buddy Icon</string>
+    <string name="pokemon_icon">Pokémon Icon</string>
     <string name="nutritional_information">Nutritional Information</string>
     <string name="protein">Protein</string>
     <string name="fats">Fats</string>
@@ -31,4 +31,8 @@
     <string name="pokedex">Pokédex</string>
     <string name="my_pokedex">My Pokédex</string>
     <string name="reward_caught_format">You caught %1$s!</string>
+    <string name="badges">Badges</string>
+    <string name="my_badges">My Badges</string>
+    <string name="badge_locked">Badge not earned yet!</string>
+    <string name="badge_awarded_on">Awarded: %1$s</string>
 </resources>

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Simple rule-based engine that assigns a Pokémon “buddy” key
+ * Simple rule-based engine that assigns a Pokémon id
  * based on the calorie, protein, carb, and vitamin content of a meal.
  * <p>
  * Type-aware: pulls current Fighting/Psychic rosters from PokeAPI at runtime
@@ -48,7 +48,7 @@ public class RewardEngine
         var repo = com.example.pokemonmealtimemasters.network.PokemonTypeRepository
                 .getInstance(context);
 
-        if (protein >= 10)
+        if (protein >= 20)
         {
             pool.addAll(repo.getIdsForType("fighting"));
         }
@@ -58,7 +58,7 @@ public class RewardEngine
             pool.addAll(repo.getIdsForType("psychic"));
         }
 
-        if (protein >= 1 && carbs >= 1)
+        if (protein >= 15 && carbs >= 15)
         {
             pool.addAll(BALANCED_REWARDS);
             for (int i = 1; i <= 151; i++)
