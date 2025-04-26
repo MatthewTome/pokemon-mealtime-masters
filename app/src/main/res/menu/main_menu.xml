@@ -13,7 +13,7 @@
     <!-- Badges -->
     <item
         android:id="@+id/action_badges"
-        android:icon="@drawable/ic_placeholder"
+        android:icon="@drawable/ic_badge"
         android:title="@string/badges"
         android:orderInCategory="1"
         app:showAsAction="ifRoom" />

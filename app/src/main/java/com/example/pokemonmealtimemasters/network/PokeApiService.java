@@ -6,7 +6,8 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 
 /**
- * Minimal Retrofit interface for the endpoints we need.
+ * Defines the Retrofit interface for querying the
+ * PokeAPI's search endpoint.
  */
 public interface PokeApiService
 {

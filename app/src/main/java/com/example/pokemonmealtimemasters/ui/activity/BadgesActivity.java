@@ -14,6 +14,12 @@ import com.google.android.material.appbar.MaterialToolbar;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Hosts the “My Badges” screen, showing all Pokémon the user
+ * has earned so far. Pulls a JSON list of caught Pokémon from
+ * SharedPreferences, displays them in a 2-column grid, and
+ * lets the user tap back to return to MainActivity.
+ */
 public class BadgesActivity extends AppCompatActivity
 {
     private SharedPreferences prefs;
