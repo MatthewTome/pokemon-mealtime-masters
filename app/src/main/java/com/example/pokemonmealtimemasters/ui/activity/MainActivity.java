@@ -1,222 +1,629 @@
 package com.example.pokemonmealtimemasters.ui.activity;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import coil.Coil;
+import coil.request.ErrorResult;
 import coil.request.ImageRequest;
+import coil.request.SuccessResult;
 import com.example.pokemonmealtimemasters.R;
 import com.example.pokemonmealtimemasters.model.LoggedMealModel;
 import com.example.pokemonmealtimemasters.ui.adapter.LoggedMealsAdapter;
 import com.example.pokemonmealtimemasters.ui.fragment.MealLoggingSheet;
 import com.example.pokemonmealtimemasters.ui.fragment.RewardSheet;
+import com.example.pokemonmealtimemasters.utils.AnimationUtils;
 import com.example.pokemonmealtimemasters.utils.RewardEngine;
-import com.google.android.material.appbar.MaterialToolbar;
+import com.example.pokemonmealtimemasters.utils.SoundManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
  * Hosts the “Home” screen, displaying the user's meals for the day,
- * as well as the daily progress bars with nutrition info.
+ * daily progress (Calories, Protein, Total Sugars), and vitamin status.
+ * Allows logging meals and displays the user's current partner Pokémon.
  */
-public class MainActivity extends AppCompatActivity
-{
-    private static final String PREFS              = "prefs";
-    private static final String KEY_LOGGED_MEALS   = "logged_meals";
+public class MainActivity extends AppCompatActivity {
+    // SharedPreferences Keys
+    private static final String PREFS = "prefs";
+    private static final String KEY_LOGGED_MEALS = "logged_meals";
     private static final String KEY_DAILY_CALORIES = "daily_calories";
-    private static final String KEY_DAILY_PROTEIN  = "daily_protein";
-    private static final String KEY_DAILY_CARBS    = "daily_carbs";
-    private static final String KEY_DAILY_VITAMINS = "daily_vitamins";
-    private static final String KEY_LAST_POKEMON   = "last_pokemon";
-    private static final String KEY_CAUGHT_SET     = "caught_pokemon_ids";
+    private static final String KEY_DAILY_PROTEIN = "daily_protein";
+    private static final String KEY_DAILY_SUGARS = "daily_sugars";
+    private static final String KEY_MULTIVITAMIN_TAKEN = "vitamin_taken";
+    private static final String KEY_LAST_CHECKED_DATE = "last_checked_date";
+    private static final String KEY_LAST_POKEMON = "last_pokemon";
+    private static final String KEY_CAUGHT_SET = "caught_pokemon_ids";
+
+    // Goals
+    private static final float GOAL_CALORIES = 2000f;
+    private static final float GOAL_PROTEIN = 50f;
+    private static final float GOAL_SUGARS = 90f;
 
     private SharedPreferences prefs;
     private Gson gson;
+    private SoundManager soundManager;
 
+    // Daily Tracking Variables
     private double dailyCalories;
     private double dailyProtein;
-    private double dailyCarbs;
-    private int    dailyVitaminCount;
+    private double dailyTotalSugars;
+    private boolean vitaminTakenToday;
 
+    // UI Elements
+    private ImageView pokemonSpriteImage;
     private LinearProgressIndicator progCalories;
     private LinearProgressIndicator progProtein;
-    private LinearProgressIndicator progCarbs;
-    private LinearProgressIndicator progVitamins;
+    private LinearProgressIndicator progTotalSugars;
+    private TextView textCaloriesValue;
+    private TextView textProteinValue;
+    private TextView textSugarsValue;
+    private CheckBox checkboxVitamin;
 
     private List<LoggedMealModel> loggedMealModels;
     private LoggedMealsAdapter adapter;
+    private RecyclerView loggedMealsRecyclerView;
+    private FloatingActionButton fabAddMeal;
+    private com.google.android.material.appbar.MaterialToolbar toolbar;
+
     private final ExecutorService rewardExecutor = Executors.newSingleThreadExecutor();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
-        gson  = new Gson();
+        gson = new Gson();
+        soundManager = new SoundManager(this);
 
-        // Last caught Pokemon
-        ImageView sprite = findViewById(R.id.image_pokemon_sprite);
-        String lastId = prefs.getString(KEY_LAST_POKEMON, null);
-        if (lastId != null)
-        {
+        findViews();
+        setupToolbar();
+        loadLastPokemon();
+        checkAndResetDailyData();
+        updateProgressBars();
+        setupProgressBarClickListeners();
+        loadLoggedMeals();
+        setupRecyclerView();
+        setupFab();
+        setupMealResultListener();
+        startPokemonIdleAnimation();
+    }
+
+    private void findViews() {
+        pokemonSpriteImage = findViewById(R.id.image_pokemon_sprite);
+        progCalories = findViewById(R.id.prog_calories);
+        progProtein = findViewById(R.id.prog_protein);
+        progTotalSugars = findViewById(R.id.prog_total_sugars);
+        textCaloriesValue = findViewById(R.id.text_calories_value);
+        textProteinValue = findViewById(R.id.text_protein_value);
+        textSugarsValue = findViewById(R.id.text_sugars_value);
+        checkboxVitamin = findViewById(R.id.checkbox_vitamin);
+        loggedMealsRecyclerView = findViewById(R.id.logged_meals_recycler);
+        fabAddMeal = findViewById(R.id.fab_add_meal);
+        toolbar = findViewById(R.id.top_app_bar);
+    }
+
+    private void loadLastPokemon() {
+        String lastId = prefs.getString(KEY_LAST_POKEMON, "25"); // Default to Pikachu if none caught
+        if (lastId != null) {
             String url = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/"
                     + lastId + ".png";
-            Coil.imageLoader(this)
-                    .enqueue(new ImageRequest.Builder(this)
-                            .data(url)
-                            .placeholder(R.drawable.ic_placeholder)
-                            .crossfade(true)
-                            .target(sprite)
-                            .build());
+            displayPokemonSprite(url);
+        } else {
+            pokemonSpriteImage.setImageResource(R.drawable.pokeball_silhouette); // Show placeholder if null
+        }
+    }
+
+    private void displayPokemonSprite(String url) {
+        Coil.imageLoader(this)
+                .enqueue(new ImageRequest.Builder(this)
+                        .data(url)
+                        .placeholder(R.drawable.pokeball_silhouette)
+                        .error(R.drawable.pokeball_silhouette)
+                        .crossfade(true)
+                        .target(pokemonSpriteImage)
+                        .build());
+    }
+
+    private void checkAndResetDailyData() {
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        String lastCheckedDate = prefs.getString(KEY_LAST_CHECKED_DATE, "");
+
+        if (!todayDate.equals(lastCheckedDate)) {
+            // It's a new day, reset daily data
+            Log.i("MainActivity", "New day detected. Resetting daily data.");
+
+            // Reset vitamin status
+            vitaminTakenToday = false;
+            dailyCalories = 0;
+            dailyProtein = 0;
+            dailyTotalSugars = 0;
+
+            // Clear old logged meals
+            loggedMealModels.clear();
+
+            // Update the last checked date and save reset values
+            prefs.edit()
+                    .putString(KEY_LAST_CHECKED_DATE, todayDate)
+                    .putBoolean(KEY_MULTIVITAMIN_TAKEN, false)
+                    .putFloat(KEY_DAILY_CALORIES, 0f)
+                    .putFloat(KEY_DAILY_PROTEIN, 0f)
+                    .putFloat(KEY_DAILY_SUGARS, 0f)
+                    .putString(KEY_LOGGED_MEALS, gson.toJson(loggedMealModels))
+                    .apply();
+        } else {
+            // Same day, load the saved data
+            vitaminTakenToday = prefs.getBoolean(KEY_MULTIVITAMIN_TAKEN, false);
+            dailyCalories = prefs.getFloat(KEY_DAILY_CALORIES, 0f);
+            dailyProtein = prefs.getFloat(KEY_DAILY_PROTEIN, 0f);
+            dailyTotalSugars = prefs.getFloat(KEY_DAILY_SUGARS, 0f);
         }
 
-        // Daily progress
-        dailyCalories     = prefs.getFloat(KEY_DAILY_CALORIES, 0f);
-        dailyProtein      = prefs.getFloat(KEY_DAILY_PROTEIN,  0f);
-        dailyCarbs        = prefs.getFloat(KEY_DAILY_CARBS,    0f);
-        dailyVitaminCount = prefs.getInt  (KEY_DAILY_VITAMINS, 0);
+        // Set checkbox state AFTER loading/resetting
+        checkboxVitamin.setChecked(vitaminTakenToday);
 
-        progCalories = findViewById(R.id.prog_calories);
-        progProtein  = findViewById(R.id.prog_protein);
-        progCarbs    = findViewById(R.id.prog_carbs);
-        progVitamins = findViewById(R.id.prog_vitamins);
-        updateProgressBars();
-
-        // Last-logged meal
-        String json = prefs.getString(KEY_LOGGED_MEALS, "");
-        if (json.isEmpty())
-        {
-            loggedMealModels = new ArrayList<>();
-        }
-        else
-        {
-            Type t = new TypeToken<List<LoggedMealModel>>() {}.getType();
-            loggedMealModels = gson.fromJson(json, t);
-        }
-
-        RecyclerView rv = findViewById(R.id.logged_meals_recycler);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new LoggedMealsAdapter(loggedMealModels);
-        rv.setAdapter(adapter);
-
-        // FAB opens meal logging sheet
-        FloatingActionButton fab = findViewById(R.id.fab_add_meal);
-        fab.setOnClickListener(v ->
-                new MealLoggingSheet()
-                        .show(getSupportFragmentManager(), "MealLoggingSheet"));
-
-        // Listen for new meal results
-        getSupportFragmentManager().setFragmentResultListener(
-                "meal_logged", this,
-                (key, bundle) ->
-                {
-                    // Meal data
-                    String name  = bundle.getString("name", "Custom");
-                    double cal   = bundle.getDouble("calories", 0);
-                    double prot  = bundle.getDouble("protein",  0);
-                    double carbs = bundle.getDouble("carbs",    0);
-                    int    vit   = (int) bundle.getDouble("vitamins", 0);
-
-                    loggedMealModels.add(0, new LoggedMealModel(name, cal, System.currentTimeMillis()));
-                    prefs.edit()
-                            .putString(KEY_LOGGED_MEALS, gson.toJson(loggedMealModels))
-                            .apply();
-                    adapter.updateData(loggedMealModels);
-
-                    // Update progress totals
-                    dailyCalories     += cal;
-                    dailyProtein      += prot;
-                    dailyCarbs        += carbs;
-                    dailyVitaminCount = Math.min(100, dailyVitaminCount + vit);
-                    prefs.edit()
-                            .putFloat(KEY_DAILY_CALORIES, (float) dailyCalories)
-                            .putFloat(KEY_DAILY_PROTEIN,  (float) dailyProtein)
-                            .putFloat(KEY_DAILY_CARBS,    (float) dailyCarbs)
-                            .putInt  (KEY_DAILY_VITAMINS, dailyVitaminCount)
-                            .apply();
-                    updateProgressBars();
-
-                    Set<String> caught = new HashSet<>(
-                            prefs.getStringSet(KEY_CAUGHT_SET, new HashSet<>()));
-
-                    // Compute rewards
-                    rewardExecutor.execute(() ->
-                    {
-                        String pokedexId = RewardEngine.computeReward(
-                                MainActivity.this, cal, prot, carbs, vit, caught);
-
-                        if (pokedexId == null)
-                        {
-                            return;     // no reward this time
-                        }
-
-                        runOnUiThread(() ->
-                        {
-                            caught.add(pokedexId);
-                            prefs.edit()
-                                    .putString(KEY_LAST_POKEMON, pokedexId)
-                                    .putStringSet(KEY_CAUGHT_SET, caught)
-                                    .apply();
-
-                            // Sprite refresh
-                            String newUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/"
-                                    + pokedexId + ".png";
-                            Coil.imageLoader(MainActivity.this)
-                                    .enqueue(new ImageRequest.Builder(MainActivity.this)
-                                            .data(newUrl)
-                                            .placeholder(R.drawable.ic_placeholder)
-                                            .crossfade(true)
-                                            .target(sprite)
-                                            .build());
-
-                            // Reward Sheet
-                            RewardSheet.newInstance(pokedexId)
-                                    .show(getSupportFragmentManager(), "RewardSheet");
-                        });
-                    });
-                });
-
-        // Toolbar
-        MaterialToolbar toolbar = findViewById(R.id.top_app_bar);
-        toolbar.setTitle(getString(R.string.title));
-        toolbar.setTitleTextColor(Color.BLACK);
-        toolbar.setOnMenuItemClickListener(item ->
-        {
-            if (item.getItemId() == R.id.action_pokedex)
-            {
-                startActivity(new Intent(MainActivity.this, PokedexActivity.class));
-                return true;
+        // Set up the listener for the checkbox AFTER potentially resetting it
+        checkboxVitamin.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // Only trigger sound/animation on direct user interaction
+            if (buttonView.isPressed()) {
+                soundManager.playSound(SoundManager.Sound.BUTTON_CLICK);
+                if (isChecked) {
+                    AnimationUtils.applyPopInAnimation(buttonView);
+                } else {
+                    AnimationUtils.applyPressAnimation(buttonView);
+                }
             }
-            else if (item.getItemId() == R.id.action_badges)
-            {
+            vitaminTakenToday = isChecked;
+            prefs.edit().putBoolean(KEY_MULTIVITAMIN_TAKEN, isChecked).apply();
+        });
+    }
+
+    private void loadLoggedMeals() {
+        String json = prefs.getString(KEY_LOGGED_MEALS, "");
+        if (json.isEmpty()) {
+            loggedMealModels = new ArrayList<>();
+        } else {
+            try {
+                Type t = new TypeToken<List<LoggedMealModel>>() {}.getType();
+                loggedMealModels = gson.fromJson(json, t);
+                if (loggedMealModels == null) {
+                    loggedMealModels = new ArrayList<>();
+                } else {
+                    loggedMealModels = new ArrayList<>(loggedMealModels);
+                }
+            } catch (JsonSyntaxException e) {
+                Log.e("MainActivity", "Error parsing logged meals (likely old format), resetting list.", e);
+                loggedMealModels = new ArrayList<>();
+                prefs.edit().remove(KEY_LOGGED_MEALS).apply();
+            } catch (Exception e) {
+                Log.e("MainActivity", "Unexpected error loading logged meals, resetting list.", e);
+                loggedMealModels = new ArrayList<>();
+                prefs.edit().remove(KEY_LOGGED_MEALS).apply();
+            }
+        }
+    }
+
+    private void setupRecyclerView() {
+        loggedMealsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new LoggedMealsAdapter(loggedMealModels);
+        loggedMealsRecyclerView.setAdapter(adapter);
+    }
+
+    private void setupToolbar() {
+        toolbar.setTitle(getString(R.string.title));
+        toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.black));
+
+        toolbar.setOnMenuItemClickListener(item -> {
+            soundManager.playSound(SoundManager.Sound.BUTTON_CLICK);
+            View itemView = toolbar.findViewById(item.getItemId());
+            if (itemView != null) {
+                AnimationUtils.applyPressAnimation(itemView);
+            }
+
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.action_pokedex) {
+                startActivity(new Intent(MainActivity.this, PokedexActivity.class));
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                return true;
+            } else if (itemId == R.id.action_badges) {
                 startActivity(new Intent(this, BadgesActivity.class));
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 return true;
             }
             return false;
         });
     }
 
-    private void updateProgressBars()
-    {
-        progCalories.setProgress((int) (dailyCalories / 2000f * 100), true);
-        progProtein .setProgress((int) (dailyProtein  / 50f   * 100), true);
-        progCarbs   .setProgress((int) (dailyCarbs    / 30f   * 100), true);
-        progVitamins.setProgress(dailyVitaminCount,                     true);
+    private void setupFab() {
+        fabAddMeal.setOnClickListener(v -> {
+            soundManager.playSound(SoundManager.Sound.BUTTON_CLICK);
+            AnimationUtils.applyPressAnimation(v);
+            new MealLoggingSheet()
+                    .show(getSupportFragmentManager(), "MealLoggingSheet");
+        });
+    }
+
+    private void setupMealResultListener() {
+        getSupportFragmentManager().setFragmentResultListener(
+                "meal_logged", this,
+                (key, bundle) ->
+                {
+                    soundManager.playSound(SoundManager.Sound.MEAL_LOGGED);
+
+                    // Extract Meal data from result bundle
+                    String name = bundle.getString("name", getString(R.string.custom_meal_name));
+                    double cal = bundle.getDouble("calories", 0);
+                    double prot = bundle.getDouble("protein", 0);
+                    double sugars = bundle.getDouble("totalSugars", 0); // Get sugars
+
+                    // Create new meal model
+                    LoggedMealModel newMeal = new LoggedMealModel(name, cal, prot, sugars, System.currentTimeMillis());
+
+                    // Update local list and adapter
+                    loggedMealModels.add(0, newMeal); // Add to top of the list
+                    adapter.updateData(loggedMealModels); // Use the adapter's update method
+                    loggedMealsRecyclerView.scrollToPosition(0); // Scroll to show the new meal
+
+                    // Update daily progress totals
+                    dailyCalories += cal;
+                    dailyProtein += prot;
+                    dailyTotalSugars += sugars;
+
+                    saveDailyData();
+                    updateProgressBars();
+                    calculateReward(cal, prot);
+                });
+    }
+
+    private void saveDailyData() {
+        prefs.edit()
+                .putFloat(KEY_DAILY_CALORIES, (float) dailyCalories)
+                .putFloat(KEY_DAILY_PROTEIN, (float) dailyProtein)
+                .putFloat(KEY_DAILY_SUGARS, (float) dailyTotalSugars)
+                .putString(KEY_LOGGED_MEALS, gson.toJson(loggedMealModels))
+                .apply();
+    }
+
+    private void calculateReward(double calories, double protein) {
+        Set<String> caught = new HashSet<>(
+                prefs.getStringSet(KEY_CAUGHT_SET, new HashSet<>()));
+
+        // Compute rewards
+        rewardExecutor.execute(() ->
+        {
+            String pokedexId = RewardEngine.computeReward(
+                    MainActivity.this, calories, protein, caught);
+
+            if (pokedexId == null) {
+                Log.d("MainActivity", "No reward calculated for this meal.");
+                return;
+            }
+
+            runOnUiThread(() -> {
+                soundManager.playSound(SoundManager.Sound.REWARD_RECEIVED);
+
+                caught.add(pokedexId);
+                prefs.edit()
+                        .putString(KEY_LAST_POKEMON, pokedexId)
+                        .putStringSet(KEY_CAUGHT_SET, caught)
+                        .apply();
+
+                updatePokemonSpriteWithAnimation(pokedexId);
+
+                RewardSheet.newInstance(pokedexId)
+                        .show(getSupportFragmentManager(), "RewardSheet");
+            });
+        });
+    }
+
+    private void updatePokemonSpriteWithAnimation(String pokedexId) {
+        String newUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/"
+                + pokedexId + ".png";
+
+        ObjectAnimator fadeOut = ObjectAnimator.ofFloat(pokemonSpriteImage, "alpha", 1f, 0f);
+        fadeOut.setDuration(300);
+        fadeOut.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                // Load new image
+                Coil.imageLoader(MainActivity.this)
+                        .enqueue(new ImageRequest.Builder(MainActivity.this)
+                                .data(newUrl)
+                                .placeholder(R.drawable.pokeball_silhouette)
+                                .error(R.drawable.pokeball_silhouette)
+                                .crossfade(false)
+                                .target(pokemonSpriteImage)
+                                .listener(new ImageRequest.Listener() {
+                                    @Override
+                                    public void onSuccess(@NonNull ImageRequest request, @NonNull SuccessResult result) {
+                                        ObjectAnimator fadeIn = ObjectAnimator.ofFloat(pokemonSpriteImage, "alpha", 0f, 1f);
+                                        fadeIn.setDuration(300);
+                                        fadeIn.start();
+                                        AnimationUtils.applyBounceAnimation(pokemonSpriteImage);
+                                    }
+
+                                    @Override
+                                    public void onError(@NonNull ImageRequest request, @NonNull ErrorResult result) {
+                                        Log.e("MainActivity", "Error loading new Pokemon sprite: " + result.getThrowable());
+                                        pokemonSpriteImage.setImageResource(R.drawable.pokeball_silhouette);
+                                        ObjectAnimator fadeIn = ObjectAnimator.ofFloat(pokemonSpriteImage, "alpha", 0f, 1f);
+                                        fadeIn.setDuration(300);
+                                        fadeIn.start();
+                                    }
+                                })
+                                .build());
+            }
+        });
+        fadeOut.start();
+    }
+
+
+    private void startPokemonIdleAnimation() {
+        ObjectAnimator bobbing = ObjectAnimator.ofFloat(pokemonSpriteImage, "translationY", 0f, -15f, 0f);
+        bobbing.setDuration(1800);
+        bobbing.setRepeatCount(ObjectAnimator.INFINITE);
+        bobbing.setRepeatMode(ObjectAnimator.REVERSE);
+        bobbing.setInterpolator(new AccelerateDecelerateInterpolator());
+        bobbing.start();
+    }
+
+    private void updateProgressBars() {
+        // Calculate percentages
+        int caloriesPercent = (int) Math.min(100, (dailyCalories / GOAL_CALORIES * 100));
+        int proteinPercent = (int) Math.min(100, (dailyProtein / GOAL_PROTEIN * 100));
+        int sugarsPercent = (int) Math.min(100, (dailyTotalSugars / GOAL_SUGARS * 100)); // Use total sugars
+
+        // Animate progress updates
+        progCalories.setProgressCompat(caloriesPercent, true);
+        progProtein.setProgressCompat(proteinPercent, true);
+        progTotalSugars.setProgressCompat(sugarsPercent, true); // Update sugar progress
+
+        // Set progress text
+        textCaloriesValue.setText(String.format(Locale.getDefault(), "%d / %.0f kcal", (int) dailyCalories, GOAL_CALORIES));
+        textProteinValue.setText(String.format(Locale.getDefault(), "%d / %.0f g", (int) dailyProtein, GOAL_PROTEIN));
+        textSugarsValue.setText(String.format(Locale.getDefault(), "%d / %.0f g", (int) dailyTotalSugars, GOAL_SUGARS));
+    }
+
+    // Progress Bar Popups
+    private enum NutrientType {CALORIES, PROTEIN, TOTAL_SUGARS}
+
+    private void setupProgressBarClickListeners() {
+        progCalories.setOnClickListener(v -> {
+            AnimationUtils.applyPressAnimation(v);
+            showNutrientBreakdownPopup(getString(R.string.calories_label), dailyCalories, NutrientType.CALORIES);
+        });
+        progProtein.setOnClickListener(v -> {
+            AnimationUtils.applyPressAnimation(v);
+            showNutrientBreakdownPopup(getString(R.string.protein_label), dailyProtein, NutrientType.PROTEIN);
+        });
+        progTotalSugars.setOnClickListener(v -> {
+            AnimationUtils.applyPressAnimation(v);
+            showNutrientBreakdownPopup(getString(R.string.total_sugars_label), dailyTotalSugars, NutrientType.TOTAL_SUGARS);
+        });
+    }
+
+    private void showNutrientBreakdownPopup(String title, double totalValue, NutrientType type) {
+        soundManager.playSound(SoundManager.Sound.POPUP_OPEN); // Popup open sound
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_MPM_Dialog);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.popup_nutrient_breakdown, null);
+        builder.setView(dialogView);
+
+        TextView popupTitle = dialogView.findViewById(R.id.popup_title);
+        TextView popupTotal = dialogView.findViewById(R.id.popup_total);
+        LinearLayout segmentedBarContainer = dialogView.findViewById(R.id.segmented_bar_container);
+        LinearLayout legendContainer = dialogView.findViewById(R.id.legend_container);
+        Button closeButton = dialogView.findViewById(R.id.button_close_popup);
+
+        popupTitle.setText(getString(R.string.nutrient_sources_title, title));
+        String unit = (type == NutrientType.CALORIES) ? getString(R.string.unit_kcal) : getString(R.string.unit_gram);
+        popupTotal.setText(getString(R.string.nutrient_total_format, (int) totalValue, unit));
+
+        segmentedBarContainer.removeAllViews(); // Clear previous views
+        legendContainer.removeAllViews();      // Clear previous views
+
+        List<MealContribution> contributions = getMealContributionsForToday(type);
+
+        int[] colors = {
+                ContextCompat.getColor(this, R.color.segment_1),
+                ContextCompat.getColor(this, R.color.segment_2),
+                ContextCompat.getColor(this, R.color.segment_3),
+                ContextCompat.getColor(this, R.color.segment_4),
+                ContextCompat.getColor(this, R.color.segment_5),
+                ContextCompat.getColor(this, R.color.segment_6)
+        };
+        int colorIndex = 0;
+
+        if (totalValue <= 0 || contributions.isEmpty()) {
+            // Handle empty state
+            TextView emptyText = new TextView(this);
+            LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            emptyText.setLayoutParams(textParams);
+            emptyText.setText(getString(R.string.no_contribution_data));
+            emptyText.setGravity(Gravity.CENTER);
+            emptyText.setPadding(0, 16, 0, 16);
+            legendContainer.addView(emptyText);
+            segmentedBarContainer.setBackgroundColor(ContextCompat.getColor(this, R.color.grey_light));
+        } else {
+            segmentedBarContainer.setBackground(null);
+            for (MealContribution contribution : contributions) {
+                if (contribution.value <= 0) continue;
+
+                float weight = (float) (contribution.value / totalValue);
+                if (weight <= 0.001f) continue;
+
+                // Create Segment View
+                View segment = new View(this);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        weight
+                );
+                segment.setLayoutParams(params);
+                int color = colors[colorIndex % colors.length];
+                segment.setBackgroundColor(color);
+                params.setMarginEnd(2);
+                segmentedBarContainer.addView(segment);
+
+                // Create Legend Item View
+                View legendItemView = inflater.inflate(R.layout.item_nutrient_legend, legendContainer, false);
+                View swatch = legendItemView.findViewById(R.id.legend_color_swatch);
+                TextView legendText = legendItemView.findViewById(R.id.legend_text);
+
+                swatch.setBackgroundColor(color);
+                String legendStr = getString(R.string.legend_item_format,
+                        contribution.mealName,
+                        (int) contribution.value,
+                        unit,
+                        (int) (weight * 100));
+                legendText.setText(legendStr);
+                legendContainer.addView(legendItemView);
+                colorIndex++;
+            }
+        }
+
+        AlertDialog dialog = builder.create();
+
+        closeButton.setOnClickListener(v -> {
+            soundManager.playSound(SoundManager.Sound.BUTTON_CLICK);
+            AnimationUtils.applyPressAnimation(v);
+            dialog.dismiss();
+        });
+
+        dialog.show();
+        AnimationUtils.applyDialogEntranceAnimation(dialogView);
+    }
+
+    // Helper class for contributions
+    private static class MealContribution {
+        String mealName;
+        double value;
+
+        MealContribution(String mealName, double value) {
+            this.mealName = mealName;
+            this.value = value;
+        }
+    }
+
+    // Gets contributions ONLY for the current day
+    private List<MealContribution> getMealContributionsForToday(NutrientType type) {
+        List<MealContribution> contributions = new ArrayList<>();
+        Calendar calStart = Calendar.getInstance();
+        calStart.set(Calendar.HOUR_OF_DAY, 0);
+        calStart.set(Calendar.MINUTE, 0);
+        calStart.set(Calendar.SECOND, 0);
+        calStart.set(Calendar.MILLISECOND, 0);
+        long todayStartTime = calStart.getTimeInMillis();
+
+        // Iterate through the currently loaded list of meals
+        for (LoggedMealModel meal : loggedMealModels) {
+            if (meal.getTimestamp() >= todayStartTime) { // Only include meals logged today
+                double value = 0;
+                switch (type) {
+                    case CALORIES:
+                        value = meal.getCalories();
+                        break;
+                    case PROTEIN:
+                        value = meal.getProtein();
+                        break;
+                    case TOTAL_SUGARS:
+                        value = meal.getTotalSugars();
+                        break;
+                }
+                if (value > 0) {
+                    contributions.add(new MealContribution(meal.getName(), value));
+                }
+            }
+        }
+        contributions.sort(Comparator.comparingDouble((MealContribution mc) -> mc.value).reversed());
+        return contributions;
+    }
+
+    public SoundManager getSoundManager() {
+        return soundManager;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (soundManager != null) {
+            soundManager.release();
+        }
+        if (rewardExecutor != null && !rewardExecutor.isShutdown()) {
+            rewardExecutor.shutdown();
+        }
+    }
+
+    // Resume/Pause Handling for Animations/Sound
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (soundManager != null) {
+            soundManager.resume();
+        }
+        // Restart animations if they were paused
+        if (pokemonSpriteImage != null && pokemonSpriteImage.getAnimation() != null) {
+            pokemonSpriteImage.getAnimation().start();
+        }
+
+        // Check if last checked date is different
+        String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        String lastCheckedDate = prefs.getString(KEY_LAST_CHECKED_DATE, "");
+        if (!todayDate.equals(lastCheckedDate)) {
+            Log.i("MainActivity", "Day change detected onResume, running reset check.");
+            checkAndResetDailyData();
+            updateProgressBars();
+            adapter.updateData(loggedMealModels);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (soundManager != null) {
+            soundManager.pause();
+        }
+        // Pause animations to save resources
+        if (pokemonSpriteImage != null && pokemonSpriteImage.getAnimation() != null) {
+            pokemonSpriteImage.clearAnimation();
+        }
     }
 }

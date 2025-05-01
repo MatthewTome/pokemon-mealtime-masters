@@ -1,43 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@drawable/bg_gradient"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+    style="@style/Widget.Material3.BottomSheet.Modal">
 
-    <com.google.android.material.card.MaterialCardView
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="8dp"
-        android:layout_gravity="center">
+        app:title="@string/nutrition_details"
+        app:navigationIcon="@drawable/ic_rounded_close_24" />
+
+    <!-- ScrollView for Content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:divider="?android:attr/dividerVertical"
-            android:showDividers="middle"
-            android:dividerPadding="12dp">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:backgroundTint="@color/primary"
-                android:title="@string/nutrition_info"
-                android:titleTextColor="@android:color/white"
-                app:navigationIcon="@drawable/ic_back_arrow"/>
-
+            <!-- Servings Input -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layout_servings"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
                 android:hint="@string/servings">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -45,34 +42,33 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="#9E9E9E" />
+                    android:text=""/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Calories Input -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layout_calories"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="@string/calories"
-                app:suffixText="kcal">
+                android:layout_marginBottom="12dp"
+                android:hint="@string/calories_kcal">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edit_calories"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="#9E9E9E" />
+                    tools:text=""/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Protein Input -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layout_protein"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
                 android:hint="@string/protein_g">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -80,37 +76,35 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="#9E9E9E" />
+                    tools:text=""/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Total Sugars Input -->
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/layout_carbs"
+                android:id="@+id/layout_total_sugars"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="@string/carbs_g">
+                android:layout_marginBottom="24dp"
+                android:hint="@string/total_sugars_g">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edit_carbs"
+                    android:id="@+id/edit_total_sugars"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="#9E9E9E" />
+                    tools:text=""/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Add Meal Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_add_meal"
-                style="@style/Widget.MaterialComponents.Button"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_gravity="center_horizontal"
                 android:text="@string/add_meal"
-                android:textColor="#311B92"
-                app:backgroundTint="@color/accent"
-                app:cornerRadius="24dp" />
+                app:icon="@drawable/ic_rounded_check_circle_24" />
+
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-</FrameLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

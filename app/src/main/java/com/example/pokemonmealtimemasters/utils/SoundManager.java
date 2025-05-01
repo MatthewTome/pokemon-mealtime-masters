@@ -68,6 +68,13 @@ public class SoundManager {
         }
     }
 
+
+    public void pause() {
+    }
+
+    public void resume() {
+    }
+
     public void setSoundEnabled(boolean enabled) {
         this.soundEnabled = enabled;
         if (!enabled) {

@@ -6,7 +6,7 @@
     <string name="calories_0">Calories: 0</string>
     <string name="time">Time</string>
     <string name="nutrition_info">Nutrition Info</string>
-    <string name="servings">Servings (e.g. 1.5)</string>
+    <string name="servings">Servings</string>
     <string name="calories">Calories</string>
     <string name="protein_g">Protein (g)</string>
     <string name="carbs">Carbs</string>
@@ -35,4 +35,32 @@
     <string name="my_badges">My Badges</string>
     <string name="badge_locked">Badge not earned yet!</string>
     <string name="badge_awarded_on">Awarded: %1$s</string>
+    <string name="total_sugars_g">Total Sugars (g)</string>
+    <string name="nutrition_details">Nutrition Details</string>
+    <string name="calories_kcal">Calories</string>
+    <string name="custom_meal_name">Custom Meal</string>
+    <string name="calories_label">Calories</string>
+    <string name="protein_label">Protein</string>
+    <string name="total_sugars_label">Total Sugars</string>
+    <string name="nutrient_sources_title">%1$s Sources</string>
+    <string name="unit_kcal">kcal</string>
+    <string name="unit_gram">g</string>
+    <string name="nutrient_total_format">Total: %1$d %2$s</string> <!-- %1$d = value, %2$s = unit -->
+    <string name="no_contribution_data">No meals with this nutrient logged yet today.</string>
+    <string name="legend_item_format">%1$s - %2$d %3$s (%4$d%%)</string> <!-- name, value, unit, percentage -->
+    <string name="close">Close</string>
+    <string name="vitamin_checkbox_label">Took Vitamin Today?</string>
+    <string name="daily_progress_title">Today You\'ve Eaten</string>
+    <string name="content_desc_pokemon_partner">Current Pokémon partner</string>
+    <string name="log_meal">Log Meal</string>
+    <string name="todays_logged_meals">Today\'s Meals</string>
+    <string name="custom_meal_entry">Custom Meal Entry</string>
+    <string name="error_positive_servings">Servings must be greater than zero.</string>
+    <string name="error_invalid_numbers">Please enter valid numbers.</string>
+    <string name="error_enter_nutrition_details">Please enter some nutrition details.</string>
+    <string name="tip1">Tip: High-protein meals may attract Fighting-type Pokémon!</string>
+    <string name="tip2">Tip: Balanced meals might reward you with rare Pokémon!</string>
+    <string name="tip3">Tip: Log meals consistently to earn streak badges!</string>
+    <string name="tip4">Tip: Explore the Pokédex to see all the Pokémon you can collect!</string>
+    <string name="error_network">Network error. Please try again.</string>
 </resources>

@@ -14,4 +14,14 @@
     <color name="sheetBackground">#FFF5E1</color>
     <color name="primary">#FF7043</color>
     <color name="accent">#42A5F5</color>
+    <color name="segment_1">#4CAF50</color>
+    <color name="segment_2">#2196F3</color>
+    <color name="segment_3">#FFC107</color>
+    <color name="segment_4">#E91E63</color>
+    <color name="segment_5">#9C27B0</color>
+    <color name="segment_6">#00BCD4</color>
+    <color name="grey_light">#E0E0E0</color>
+    <color name="grey_dark">#232323</color>
+    <color name="protein_color">#34cb34</color>
+    <color name="sugar_color">#F44336</color>
 </resources>

@@ -11,7 +11,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        app:navigationIcon="@drawable/ic_back_arrow"
+        app:navigationIcon="@drawable/ic_rounded_close_24"
         android:background="@android:color/transparent"
         android:title="@string/log_a_meal"
         android:titleTextColor="@android:color/black"/>

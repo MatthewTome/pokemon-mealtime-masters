@@ -85,7 +85,7 @@ public class RewardSheet extends BottomSheetDialogFragment {
                 ImageRequest req = new ImageRequest.Builder(requireContext())
                         .data(artUrl)
                         .crossfade(true)
-                        .placeholder(R.drawable.ic_placeholder)
+                        .placeholder(R.drawable.pokeball_silhouette)
                         .target(image)
                         .build();
                 loader.enqueue(req);
@@ -96,7 +96,7 @@ public class RewardSheet extends BottomSheetDialogFragment {
                                   @NonNull Throwable t) {
                 // fallback: just show ID in the title, and a placeholder image
                 title.setText(getString(R.string.reward_caught_format, pokemonId));
-                image.setImageResource(R.drawable.ic_placeholder);
+                image.setImageResource(R.drawable.pokeball_silhouette);
             }
         });
 

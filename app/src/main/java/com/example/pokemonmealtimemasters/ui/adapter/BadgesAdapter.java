@@ -77,7 +77,7 @@ public class BadgesAdapter extends RecyclerView.Adapter<BadgesAdapter.BadgeVH>
     {
         String name   = earned ? ("badge_" + id.toLowerCase()) : "ic_badge_silhouette";
         int    resId  = ctx.getResources().getIdentifier(name, "drawable", ctx.getPackageName());
-        return resId != 0 ? resId : R.drawable.ic_placeholder;
+        return resId != 0 ? resId : R.drawable.pokeball_silhouette;
     }
 
     private void showPopup(BadgeModel b)

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/popup_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceTitleLarge"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"
+        tools:text="Protein Sources" />
+
+    <TextView
+        android:id="@+id/popup_total"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceTitleMedium"
+        android:gravity="center"
+        android:layout_marginBottom="8dp"
+        tools:text="Total: 50g" />
+
+    <LinearLayout
+        android:id="@+id/segmented_bar_container"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/segmented_bar_background" >
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/legend_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:maxHeight="200dp">
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/button_close_popup"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:text="@string/close" />
+
+</LinearLayout>

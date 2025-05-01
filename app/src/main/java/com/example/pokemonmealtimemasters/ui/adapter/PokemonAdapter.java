@@ -61,7 +61,7 @@ public class PokemonAdapter extends RecyclerView.Adapter<PokemonAdapter.ViewHold
         ImageLoader loader = Coil.imageLoader(context);
         ImageRequest request = new ImageRequest.Builder(context)
                 .data(imageUrl)
-                .placeholder(R.drawable.ic_placeholder)
+                .placeholder(R.drawable.pokeball_silhouette)
                 .crossfade(true)
                 .target(holder.pokemonImage)
                 .build();
@@ -100,7 +100,7 @@ public class PokemonAdapter extends RecyclerView.Adapter<PokemonAdapter.ViewHold
         String imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/" + id + ".png";
         Coil.imageLoader(context).enqueue(new ImageRequest.Builder(context)
                 .data(imageUrl)
-                .placeholder(R.drawable.ic_placeholder)
+                .placeholder(R.drawable.pokeball_silhouette)
                 .target(pokemonImage)
                 .build());
 
