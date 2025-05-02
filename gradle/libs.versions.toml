@@ -18,6 +18,10 @@ materialComponents = "1.12.0"
 gson = '2.10.1'
 coil = "2.3.0"
 volley = "1.2.1"
+robolectric = "4.8.1"
+androidx_test_core = "1.6.1"
+mockwebserver = "4.9.3"
+fragmentTesting = "1.8.6"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -44,7 +48,11 @@ material = { group = "com.google.android.material", name = "material", version.r
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 volley = { group = "com.android.volley", name = "volley", version = "1.2.1" }
-android-volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
+robolectric = { group="org.robolectric", name="robolectric", version.ref="robolectric" }
+androidx-test-core = { group="androidx.test", name="core", version.ref="androidx_test_core" }
+mockwebserver = { group="com.squareup.okhttp3", name="mockwebserver", version.ref="mockwebserver" }
+shadows-webkit = { group="org.robolectric", name="shadows-webkit", version.ref="robolectric" }
+androidx-fragment-testing = { group = "androidx.fragment", name = "fragment-testing", version.ref = "fragmentTesting" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

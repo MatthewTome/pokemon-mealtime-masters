@@ -51,12 +51,12 @@ public class LoggedMealsAdapter extends RecyclerView.Adapter<LoggedMealsAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         LoggedMealModel meal = data.get(position);
-        holder.name.setText(meal.getName());
+        holder.name.setText(meal.name());
         holder.details.setText(
                 String.format(Locale.getDefault(),
                         "%d cal – %s",
-                        (int) meal.getCalories(),
-                        formatTime(meal.getTimestamp())
+                        (int) meal.calories(),
+                        formatTime(meal.timestamp())
                 )
         );
         holder.itemView.setOnClickListener(v -> {
@@ -83,7 +83,7 @@ public class LoggedMealsAdapter extends RecyclerView.Adapter<LoggedMealsAdapter.
         }
     }
 
-    // Formats a timestamp (ms since epoch) into a user-friendly time string (e.g. "02:30 PM").
+    // Formats a timestamp into a user-friendly time string (e.g. "02:30 PM").
     private String formatTime(long ts) {
         return new SimpleDateFormat("hh:mm a", Locale.getDefault())
                 .format(new Date(ts));

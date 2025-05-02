@@ -114,10 +114,10 @@ public class MainActivity extends AppCompatActivity {
         findViews();
         setupToolbar();
         loadLastPokemon();
+        loadLoggedMeals();
         checkAndResetDailyData();
         updateProgressBars();
         setupProgressBarClickListeners();
-        loadLoggedMeals();
         setupRecyclerView();
         setupFab();
         setupMealResultListener();
@@ -555,21 +555,21 @@ public class MainActivity extends AppCompatActivity {
 
         // Iterate through the currently loaded list of meals
         for (LoggedMealModel meal : loggedMealModels) {
-            if (meal.getTimestamp() >= todayStartTime) { // Only include meals logged today
+            if (meal.timestamp() >= todayStartTime) { // Only include meals logged today
                 double value = 0;
                 switch (type) {
                     case CALORIES:
-                        value = meal.getCalories();
+                        value = meal.calories();
                         break;
                     case PROTEIN:
-                        value = meal.getProtein();
+                        value = meal.protein();
                         break;
                     case TOTAL_SUGARS:
-                        value = meal.getTotalSugars();
+                        value = meal.totalSugars();
                         break;
                 }
                 if (value > 0) {
-                    contributions.add(new MealContribution(meal.getName(), value));
+                    contributions.add(new MealContribution(meal.name(), value));
                 }
             }
         }

@@ -26,7 +26,6 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-
         buildConfigField( "String", "FDC_API_KEY", "\"${fdcApiKey}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -42,11 +41,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -65,7 +64,12 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.appcompat)
-    implementation(libs.android.volley)
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.constraintlayout)
+    implementation(libs.material)
+    implementation(libs.gson)
+    implementation(libs.coil)
+    implementation(libs.androidx.fragment.testing)
 
     // Testing dependencies
     testImplementation(libs.junit)
@@ -75,17 +79,17 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    // Added dependencies
-    implementation(libs.androidx.recyclerview)
-    implementation(libs.constraintlayout)
-    implementation(libs.material)
-    implementation(libs.gson)
-    implementation(libs.coil)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.retrofit)
+    testImplementation(libs.gson)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.mockwebserver)
+    debugImplementation(libs.androidx.fragment.testing)
 
     // Network dependencies for FoodData Central API integration
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp)
     implementation(libs.volley)
+
 }

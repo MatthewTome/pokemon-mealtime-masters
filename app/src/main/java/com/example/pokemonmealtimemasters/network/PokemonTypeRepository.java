@@ -1,5 +1,6 @@
 package com.example.pokemonmealtimemasters.network;
 
+import android.app.Application;
 import android.content.Context;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,16 +14,19 @@ import retrofit2.Response;
  * Caches Pokédex-ID lists for each type we care about so we only hit
  * the network once per type during an app session.
  */
-public final class PokemonTypeRepository
+public class PokemonTypeRepository
 {
-    private static PokemonTypeRepository instance;
+    static PokemonTypeRepository instance;
 
-    private final PokeApiService api;
+    PokeApiService api;
     private final HashMap<String, List<String>> cache = new HashMap<>();
 
     private PokemonTypeRepository(Context ctx)
     {
         api = PokeApiClient.getClient(ctx).create(PokeApiService.class);
+    }
+
+    public PokemonTypeRepository(Application application) {
     }
 
     public static synchronized PokemonTypeRepository getInstance(Context ctx)

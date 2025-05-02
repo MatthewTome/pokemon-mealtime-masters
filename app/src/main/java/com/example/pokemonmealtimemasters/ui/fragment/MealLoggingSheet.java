@@ -47,8 +47,8 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
     private FoodSearchResponseAdapter searchAdapter;
     private FoodSearchResponseAdapter presetAdapter;
     private FoodDataService service;
-    private SharedPreferences prefs;
-    private Gson gson;
+    SharedPreferences prefs;
+    Gson gson;
 
     private static final String PREFS_NAME       = "com.example.pokemonmealtimemasters.PREFS";
     private static final String KEY_LOGGED_MEALS = "logged_meals";
@@ -142,7 +142,7 @@ public class MealLoggingSheet extends BottomSheetDialogFragment {
         LoggedMealsAdapter recentAdapter = new LoggedMealsAdapter(loadLoggedMeals());
         recentRecycler.setAdapter(recentAdapter);
         recentAdapter.setOnItemClickListener(meal ->
-                service.searchFood(meal.getName(), BuildConfig.FDC_API_KEY)
+                service.searchFood(meal.name(), BuildConfig.FDC_API_KEY)
                         .enqueue(new Callback<>() {
                             @Override
                             public void onResponse(@NonNull Call<FoodSearchResponseModel> call,
