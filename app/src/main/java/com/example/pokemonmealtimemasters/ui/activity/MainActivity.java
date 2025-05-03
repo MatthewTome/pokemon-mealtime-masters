@@ -7,17 +7,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,6 +25,7 @@ import com.example.pokemonmealtimemasters.R;
 import com.example.pokemonmealtimemasters.model.LoggedMealModel;
 import com.example.pokemonmealtimemasters.ui.adapter.LoggedMealsAdapter;
 import com.example.pokemonmealtimemasters.ui.fragment.MealLoggingSheet;
+import com.example.pokemonmealtimemasters.ui.fragment.NutrientBreakdownDialogFragment;
 import com.example.pokemonmealtimemasters.ui.fragment.RewardSheet;
 import com.example.pokemonmealtimemasters.utils.AnimationUtils;
 import com.example.pokemonmealtimemasters.utils.RewardEngine;
@@ -37,7 +33,6 @@ import com.example.pokemonmealtimemasters.utils.SoundManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
@@ -140,13 +135,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadLastPokemon() {
         String lastId = prefs.getString(KEY_LAST_POKEMON, "25"); // Default to Pikachu if none caught
-        if (lastId != null) {
-            String url = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/"
-                    + lastId + ".png";
-            displayPokemonSprite(url);
-        } else {
-            pokemonSpriteImage.setImageResource(R.drawable.pokeball_silhouette); // Show placeholder if null
-        }
+        String url = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/"
+                + lastId + ".png";
+        displayPokemonSprite(url);
     }
 
     private void displayPokemonSprite(String url) {
@@ -164,20 +155,14 @@ public class MainActivity extends AppCompatActivity {
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         String lastCheckedDate = prefs.getString(KEY_LAST_CHECKED_DATE, "");
 
+        // Reset Daily Totals
         if (!todayDate.equals(lastCheckedDate)) {
-            // It's a new day, reset daily data
-            Log.i("MainActivity", "New day detected. Resetting daily data.");
-
-            // Reset vitamin status
             vitaminTakenToday = false;
             dailyCalories = 0;
             dailyProtein = 0;
             dailyTotalSugars = 0;
-
-            // Clear old logged meals
             loggedMealModels.clear();
 
-            // Update the last checked date and save reset values
             prefs.edit()
                     .putString(KEY_LAST_CHECKED_DATE, todayDate)
                     .putBoolean(KEY_MULTIVITAMIN_TAKEN, false)
@@ -226,12 +211,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     loggedMealModels = new ArrayList<>(loggedMealModels);
                 }
-            } catch (JsonSyntaxException e) {
-                Log.e("MainActivity", "Error parsing logged meals (likely old format), resetting list.", e);
-                loggedMealModels = new ArrayList<>();
-                prefs.edit().remove(KEY_LOGGED_MEALS).apply();
             } catch (Exception e) {
-                Log.e("MainActivity", "Unexpected error loading logged meals, resetting list.", e);
                 loggedMealModels = new ArrayList<>();
                 prefs.edit().remove(KEY_LOGGED_MEALS).apply();
             }
@@ -290,15 +270,15 @@ public class MainActivity extends AppCompatActivity {
                     String name = bundle.getString("name", getString(R.string.custom_meal_name));
                     double cal = bundle.getDouble("calories", 0);
                     double prot = bundle.getDouble("protein", 0);
-                    double sugars = bundle.getDouble("totalSugars", 0); // Get sugars
+                    double sugars = bundle.getDouble("totalSugars", 0);
 
                     // Create new meal model
                     LoggedMealModel newMeal = new LoggedMealModel(name, cal, prot, sugars, System.currentTimeMillis());
 
                     // Update local list and adapter
-                    loggedMealModels.add(0, newMeal); // Add to top of the list
-                    adapter.updateData(loggedMealModels); // Use the adapter's update method
-                    loggedMealsRecyclerView.scrollToPosition(0); // Scroll to show the new meal
+                    loggedMealModels.add(0, newMeal);
+                    adapter.updateData(loggedMealModels);
+                    loggedMealsRecyclerView.scrollToPosition(0);
 
                     // Update daily progress totals
                     dailyCalories += cal;
@@ -393,7 +373,6 @@ public class MainActivity extends AppCompatActivity {
         fadeOut.start();
     }
 
-
     private void startPokemonIdleAnimation() {
         ObjectAnimator bobbing = ObjectAnimator.ofFloat(pokemonSpriteImage, "translationY", 0f, -15f, 0f);
         bobbing.setDuration(1800);
@@ -420,132 +399,51 @@ public class MainActivity extends AppCompatActivity {
         textSugarsValue.setText(String.format(Locale.getDefault(), "%d / %.0f g", (int) dailyTotalSugars, GOAL_SUGARS));
     }
 
-    // Progress Bar Popups
-    private enum NutrientType {CALORIES, PROTEIN, TOTAL_SUGARS}
-
     private void setupProgressBarClickListeners() {
         progCalories.setOnClickListener(v -> {
             AnimationUtils.applyPressAnimation(v);
-            showNutrientBreakdownPopup(getString(R.string.calories_label), dailyCalories, NutrientType.CALORIES);
+            // Note: Play sound here BEFORE showing dialog for simplicity
+            soundManager.playSound(SoundManager.Sound.POPUP_OPEN);
+            List<NutrientBreakdownDialogFragment.MealContribution> contributions = getMealContributionsForToday(NutrientBreakdownDialogFragment.NutrientType.CALORIES);
+            NutrientBreakdownDialogFragment.newInstance(
+                    getString(R.string.calories_label),
+                    dailyCalories,
+                    GOAL_CALORIES, // Pass the goal
+                    NutrientBreakdownDialogFragment.NutrientType.CALORIES,
+                    contributions
+            ).show(getSupportFragmentManager(), "NutrientBreakdownDialog_Calories");
         });
+
         progProtein.setOnClickListener(v -> {
             AnimationUtils.applyPressAnimation(v);
-            showNutrientBreakdownPopup(getString(R.string.protein_label), dailyProtein, NutrientType.PROTEIN);
+            soundManager.playSound(SoundManager.Sound.POPUP_OPEN);
+            List<NutrientBreakdownDialogFragment.MealContribution> contributions = getMealContributionsForToday(NutrientBreakdownDialogFragment.NutrientType.PROTEIN);
+            NutrientBreakdownDialogFragment.newInstance(
+                    getString(R.string.protein_label),
+                    dailyProtein,
+                    GOAL_PROTEIN, // Pass the goal
+                    NutrientBreakdownDialogFragment.NutrientType.PROTEIN,
+                    contributions
+            ).show(getSupportFragmentManager(), "NutrientBreakdownDialog_Protein");
         });
+
         progTotalSugars.setOnClickListener(v -> {
             AnimationUtils.applyPressAnimation(v);
-            showNutrientBreakdownPopup(getString(R.string.total_sugars_label), dailyTotalSugars, NutrientType.TOTAL_SUGARS);
+            soundManager.playSound(SoundManager.Sound.POPUP_OPEN);
+            List<NutrientBreakdownDialogFragment.MealContribution> contributions = getMealContributionsForToday(NutrientBreakdownDialogFragment.NutrientType.TOTAL_SUGARS);
+            NutrientBreakdownDialogFragment.newInstance(
+                    getString(R.string.total_sugars_label),
+                    dailyTotalSugars,
+                    GOAL_SUGARS, // Pass the goal
+                    NutrientBreakdownDialogFragment.NutrientType.TOTAL_SUGARS,
+                    contributions
+            ).show(getSupportFragmentManager(), "NutrientBreakdownDialog_Sugars");
         });
-    }
-
-    private void showNutrientBreakdownPopup(String title, double totalValue, NutrientType type) {
-        soundManager.playSound(SoundManager.Sound.POPUP_OPEN); // Popup open sound
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_MPM_Dialog);
-        LayoutInflater inflater = this.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.popup_nutrient_breakdown, null);
-        builder.setView(dialogView);
-
-        TextView popupTitle = dialogView.findViewById(R.id.popup_title);
-        TextView popupTotal = dialogView.findViewById(R.id.popup_total);
-        LinearLayout segmentedBarContainer = dialogView.findViewById(R.id.segmented_bar_container);
-        LinearLayout legendContainer = dialogView.findViewById(R.id.legend_container);
-        Button closeButton = dialogView.findViewById(R.id.button_close_popup);
-
-        popupTitle.setText(getString(R.string.nutrient_sources_title, title));
-        String unit = (type == NutrientType.CALORIES) ? getString(R.string.unit_kcal) : getString(R.string.unit_gram);
-        popupTotal.setText(getString(R.string.nutrient_total_format, (int) totalValue, unit));
-
-        segmentedBarContainer.removeAllViews(); // Clear previous views
-        legendContainer.removeAllViews();      // Clear previous views
-
-        List<MealContribution> contributions = getMealContributionsForToday(type);
-
-        int[] colors = {
-                ContextCompat.getColor(this, R.color.segment_1),
-                ContextCompat.getColor(this, R.color.segment_2),
-                ContextCompat.getColor(this, R.color.segment_3),
-                ContextCompat.getColor(this, R.color.segment_4),
-                ContextCompat.getColor(this, R.color.segment_5),
-                ContextCompat.getColor(this, R.color.segment_6)
-        };
-        int colorIndex = 0;
-
-        if (totalValue <= 0 || contributions.isEmpty()) {
-            // Handle empty state
-            TextView emptyText = new TextView(this);
-            LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            emptyText.setLayoutParams(textParams);
-            emptyText.setText(getString(R.string.no_contribution_data));
-            emptyText.setGravity(Gravity.CENTER);
-            emptyText.setPadding(0, 16, 0, 16);
-            legendContainer.addView(emptyText);
-            segmentedBarContainer.setBackgroundColor(ContextCompat.getColor(this, R.color.grey_light));
-        } else {
-            segmentedBarContainer.setBackground(null);
-            for (MealContribution contribution : contributions) {
-                if (contribution.value <= 0) continue;
-
-                float weight = (float) (contribution.value / totalValue);
-                if (weight <= 0.001f) continue;
-
-                // Create Segment View
-                View segment = new View(this);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        0,
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        weight
-                );
-                segment.setLayoutParams(params);
-                int color = colors[colorIndex % colors.length];
-                segment.setBackgroundColor(color);
-                params.setMarginEnd(2);
-                segmentedBarContainer.addView(segment);
-
-                // Create Legend Item View
-                View legendItemView = inflater.inflate(R.layout.item_nutrient_legend, legendContainer, false);
-                View swatch = legendItemView.findViewById(R.id.legend_color_swatch);
-                TextView legendText = legendItemView.findViewById(R.id.legend_text);
-
-                swatch.setBackgroundColor(color);
-                String legendStr = getString(R.string.legend_item_format,
-                        contribution.mealName,
-                        (int) contribution.value,
-                        unit,
-                        (int) (weight * 100));
-                legendText.setText(legendStr);
-                legendContainer.addView(legendItemView);
-                colorIndex++;
-            }
-        }
-
-        AlertDialog dialog = builder.create();
-
-        closeButton.setOnClickListener(v -> {
-            soundManager.playSound(SoundManager.Sound.BUTTON_CLICK);
-            AnimationUtils.applyPressAnimation(v);
-            dialog.dismiss();
-        });
-
-        dialog.show();
-        AnimationUtils.applyDialogEntranceAnimation(dialogView);
-    }
-
-    // Helper class for contributions
-    private static class MealContribution {
-        String mealName;
-        double value;
-
-        MealContribution(String mealName, double value) {
-            this.mealName = mealName;
-            this.value = value;
-        }
     }
 
     // Gets contributions ONLY for the current day
-    private List<MealContribution> getMealContributionsForToday(NutrientType type) {
-        List<MealContribution> contributions = new ArrayList<>();
+    private List<NutrientBreakdownDialogFragment.MealContribution> getMealContributionsForToday(NutrientBreakdownDialogFragment.NutrientType type) {
+        List<NutrientBreakdownDialogFragment.MealContribution> contributions = new ArrayList<>();
         Calendar calStart = Calendar.getInstance();
         calStart.set(Calendar.HOUR_OF_DAY, 0);
         calStart.set(Calendar.MINUTE, 0);
@@ -555,25 +453,18 @@ public class MainActivity extends AppCompatActivity {
 
         // Iterate through the currently loaded list of meals
         for (LoggedMealModel meal : loggedMealModels) {
-            if (meal.timestamp() >= todayStartTime) { // Only include meals logged today
-                double value = 0;
-                switch (type) {
-                    case CALORIES:
-                        value = meal.calories();
-                        break;
-                    case PROTEIN:
-                        value = meal.protein();
-                        break;
-                    case TOTAL_SUGARS:
-                        value = meal.totalSugars();
-                        break;
-                }
+            if (meal.timestamp() >= todayStartTime) {
+                double value = switch (type) {
+                    case CALORIES -> meal.calories();
+                    case PROTEIN -> meal.protein();
+                    case TOTAL_SUGARS -> meal.totalSugars();
+                };
                 if (value > 0) {
-                    contributions.add(new MealContribution(meal.name(), value));
+                    contributions.add(new NutrientBreakdownDialogFragment.MealContribution(meal.name(), value));
                 }
             }
         }
-        contributions.sort(Comparator.comparingDouble((MealContribution mc) -> mc.value).reversed());
+        contributions.sort(Comparator.comparingDouble(NutrientBreakdownDialogFragment.MealContribution::getValue).reversed());
         return contributions;
     }
 
@@ -606,9 +497,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Check if last checked date is different
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        String lastCheckedDate = prefs.getString(KEY_LAST_CHECKED_DATE, "");
+        String lastCheckedDate = prefs.getString(MainActivity.KEY_LAST_CHECKED_DATE, "");
         if (!todayDate.equals(lastCheckedDate)) {
-            Log.i("MainActivity", "Day change detected onResume, running reset check.");
             checkAndResetDailyData();
             updateProgressBars();
             adapter.updateData(loggedMealModels);

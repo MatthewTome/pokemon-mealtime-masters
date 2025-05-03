@@ -30,26 +30,21 @@ import com.google.android.material.textfield.TextInputEditText;
  */
 public class NutritionDetailSheet extends BottomSheetDialogFragment {
     private static final String ARG_ITEM = "item";
-    private FoodSearchResponseModel.FoodItem item; // The selected food item, null if custom
+    private FoodSearchResponseModel.FoodItem item;
 
     private TextInputEditText editServings;
     private TextInputEditText editCalories;
     private TextInputEditText editProtein;
-    private TextInputEditText editTotalSugars; // Added
+    private TextInputEditText editTotalSugars;
 
-    private SoundManager soundManager; // To play sounds
+    private SoundManager soundManager;
 
-    /**
-     * Factory method to create a new instance of this sheet with an optional FoodItem.
-     * @param item The FoodItem to display (null for custom entry)
-     * @return Configured NutritionDetailSheet instance
-     */
     public static NutritionDetailSheet newInstance(
             @Nullable FoodSearchResponseModel.FoodItem item
     ) {
         NutritionDetailSheet sheet = new NutritionDetailSheet();
         Bundle args = new Bundle();
-        args.putSerializable(ARG_ITEM, item); // FoodItem must be Serializable
+        args.putSerializable(ARG_ITEM, item);
         sheet.setArguments(args);
         return sheet;
     }
@@ -76,16 +71,11 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
         );
     }
 
-    /**
-     * Sets up the toolbar, input fields, and "Add Meal" button.
-     * Pre-fills fields if a food item was passed; otherwise leaves them editable for custom entry.
-     */
     @Override
     public void onViewCreated(@NonNull View view,
                               @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Find Views
         // UI Elements
         MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
         editServings = view.findViewById(R.id.edit_servings);
@@ -106,7 +96,7 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
             toolbar.setTitle(item.getDescription()); // Set title to food name
             editServings.setText("1"); // Default to 1 serving
 
-            // Extract Energy (kcal) - prioritize kcal, convert kJ if needed
+            // Extract Energy (kcal)
             double rawEnergy = extractNutrientValue(item, "Energy", "kcal", true);
             editCalories.setText(String.valueOf(Math.round(rawEnergy))); // Round to nearest whole number
 
@@ -114,28 +104,27 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
             double rawProt = extractNutrientValue(item, "Protein", "g", false);
             editProtein.setText(String.valueOf(Math.round(rawProt)));
 
-            // Extract Total Sugars (g) - Check common names
+            // Extract Total Sugars (g)
             double rawSugars = extractNutrientValue(item, "Sugars, total including NLEA", "g", false);
-            if (rawSugars == 0) { // Fallback 1
+            if (rawSugars == 0) {
                 rawSugars = extractNutrientValue(item, "Sugars, total", "g", false);
             }
-            if (rawSugars == 0) { // Fallback 2
+            if (rawSugars == 0) {
                 rawSugars = extractNutrientValue(item, "Total Sugars", "g", false);
             }
             editTotalSugars.setText(String.valueOf(Math.round(rawSugars))); // Set sugars value
 
         } else {
             // Setup for custom entry
-            toolbar.setTitle(getString(R.string.custom_meal_entry)); // Title for custom entry
+            toolbar.setTitle(getString(R.string.custom_meal_entry));
             editServings.setText("1");
-            // Leave other fields blank for user input
         }
 
         // Handle the Add Meal button click
         btnAdd.setOnClickListener(v -> {
             if (soundManager != null) soundManager.playSound(SoundManager.Sound.BUTTON_CLICK);
-            AnimationUtils.applyPressAnimation(v); // Add button press animation
-            logMeal(); // Call separate method to handle logging logic
+            AnimationUtils.applyPressAnimation(v);
+            logMeal();
         });
     }
 
@@ -173,12 +162,11 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
             result.putDouble("totalSugars", sugars); // Add sugars to result
             result.putLong("timestamp", System.currentTimeMillis());
 
-            // Send result back to the parent fragment/activity (MainActivity)
+            // Send result back to MainActivity
             getParentFragmentManager().setFragmentResult("meal_logged", result);
             dismiss(); // Close the bottom sheet
 
         } catch (NumberFormatException e) {
-            // This catch might be less likely now with parseDoubleOrDefault, but keep as fallback
             showToast(getString(R.string.error_invalid_numbers));
         }
     }
@@ -192,7 +180,7 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
             return Double.parseDouble(text.toString());
         } catch (NumberFormatException e) {
             Log.w("NutritionDetailSheet", "NumberFormatException parsing: " + text);
-            return 0.0; // Return 0 if parsing fails
+            return 0.0;
         }
     }
 
@@ -212,7 +200,7 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
             if (bottomSheet != null) {
                 BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheet);
                 behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                behavior.setSkipCollapsed(true); // Prevent it from settling in collapsed state
+                behavior.setSkipCollapsed(true);
             }
         });
         return dialog;
@@ -235,7 +223,6 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
             boolean allowKJConversion) {
 
         if (foodItem == null || foodItem.getFoodNutrients() == null) {
-            Log.d("NutrientExtract", "Food item or nutrients list is null for: " + nutrientName);
             return 0.0;
         }
 
@@ -253,8 +240,6 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
                     exactMatch = nutrient;
                     break; // Found exact match, no need to continue
                 }
-                // Check for partial match (e.g., "Energy" matches "Energy, total")
-                // Only store the first partial match found for now
                 if (partialMatch == null && currentNutrientNameLower.contains(nutrientNameLower)) {
                     partialMatch = nutrient;
                 }
@@ -265,14 +250,11 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
         FoodSearchResponseModel.FoodItem.FoodNutrient bestMatch = (exactMatch != null) ? exactMatch : partialMatch;
 
         if (bestMatch != null) {
-            Log.d("NutrientExtract", "Found match for '" + nutrientName + "': '" + bestMatch.getNutrientName() + "' with value " + bestMatch.getValue() + " " + bestMatch.getUnitName());
             return convertNutrientValue(bestMatch.getValue(), bestMatch.getUnitName(), targetUnit, allowKJConversion && nutrientNameLower.contains("energy"));
         } else {
-            Log.w("NutrientExtract", "Nutrient not found for: " + nutrientName + " in item: " + foodItem.getDescription());
             return 0.0; // Nutrient not found
         }
     }
-
 
     /**
      * Converts a nutrient value from its original unit to a target unit if possible.
@@ -286,23 +268,20 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
      */
     private double convertNutrientValue(double value, @Nullable String originalUnit, @NonNull String targetUnit, boolean allowKJConversion) {
         if (TextUtils.isEmpty(originalUnit)) {
-            Log.w("NutrientConvert", "Original unit is null or empty, cannot convert.");
-            return value; // Cannot convert without original unit
+            return value;
         }
 
         String unitLower = originalUnit.toLowerCase();
         String targetUnitLower = targetUnit.toLowerCase();
 
-        // Direct match (case-insensitive) - common case
+        // Direct match
         if (unitLower.equals(targetUnitLower)) {
             return value;
         }
-        // Handle common variations like "g" vs "gram" if needed, though API seems consistent
         if (unitLower.equals("g") && targetUnitLower.equals("gram")) return value;
         if (unitLower.equals("gram") && targetUnitLower.equals("g")) return value;
 
-
-        // Specific conversion: kJ to kcal (only if allowed and units match)
+        // Specific conversion: kJ to kcal
         if (allowKJConversion && unitLower.equals("kj") && targetUnitLower.equals("kcal")) {
             Log.d("NutrientConvert", "Converting " + value + " kJ to kcal.");
             return value / 4.184;
@@ -329,7 +308,6 @@ public class NutritionDetailSheet extends BottomSheetDialogFragment {
             Log.d("NutrientConvert", "Converting " + value + " mcg to mg.");
             return value / 1000.0;
         }
-
 
         // If no specific conversion rule is found
         Log.w("NutrientConvert", "Cannot convert unit '" + originalUnit + "' to '" + targetUnit + "'. Returning original value.");

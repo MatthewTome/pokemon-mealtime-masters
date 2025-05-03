@@ -49,7 +49,7 @@ public interface PokeApiService
         public static class PokemonResource
         {
             public String name;
-            public String url;    // “.../pokemon/68/”
+            public String url;
         }
     }
 }

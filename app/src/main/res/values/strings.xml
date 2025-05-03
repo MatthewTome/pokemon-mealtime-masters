@@ -63,4 +63,18 @@
     <string name="tip3">Tip: Log meals consistently to earn streak badges!</string>
     <string name="tip4">Tip: Explore the Pokédex to see all the Pokémon you can collect!</string>
     <string name="error_network">Network error. Please try again.</string>
+    <string name="nutrient_breakdown_title">Nutrient Breakdown</string>
+    <string name="content_desc_educational_tip_icon">Educational tip icon</string>
+    <string name="tip_calories_low">Eating gives you energy to play! Let\'s find some more yummy fuel.</string>
+    <string name="tip_calories_good">Great energy level! You\'re fueling up like a champ!</string>
+    <string name="tip_calories_high">Wow, lots of energy! Ready for big adventures!</string>
+    <string name="tip_protein_low">Protein helps build strong muscles! Look for foods like chicken, beans, or eggs.</string>
+    <string name="tip_protein_good">Awesome protein power! You\'re building strong muscles!</string>
+    <string name="tip_protein_very_high">Super muscle fuel! You\'re getting really strong!</string>
+    <string name="tip_sugars_good">Great job keeping sugars in check!</string>
+    <string name="tip_sugars_moderate">Sweets are tasty treats! Remember fruits have natural sugars too.</string>
+    <string name="tip_sugars_high">Whoa, that\'s a lot of sugar! Sweet treats are best in small amounts.</string>
+    <string name="search_food_hint">Search for a food…</string>
+    <string name="add_custom_food">Add Custom Food Entry</string>
+    <string name="log_this_meal">Log This Meal</string>
 </resources>

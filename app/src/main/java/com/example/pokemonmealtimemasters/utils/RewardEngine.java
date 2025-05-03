@@ -1,10 +1,7 @@
 package com.example.pokemonmealtimemasters.utils;
 
 import android.content.Context;
-import android.util.Log; // Import Log
-
 import com.example.pokemonmealtimemasters.network.PokemonTypeRepository;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -68,7 +65,7 @@ public class RewardEngine {
 
         // Remove duplicates
         pool = new ArrayList<>(new HashSet<>(pool));
-//        pool.removeAll(caught);
+        pool.removeAll(caught);
 
         if (pool.isEmpty()) {
             return null;

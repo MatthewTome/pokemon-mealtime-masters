@@ -183,18 +183,18 @@ public class PokemonAdapter extends RecyclerView.Adapter<PokemonAdapter.ViewHold
     }
 
     private String generationToRegion(String gen) {
-        switch (gen) {
-            case "generation-i": return "Kanto (Generation 1)";
-            case "generation-ii": return "Johto (Generation 2)";
-            case "generation-iii": return "Hoenn (Generation 3)";
-            case "generation-iv": return "Sinnoh (Generation 4)";
-            case "generation-v": return "Unova (Generation 5)";
-            case "generation-vi": return "Kalos (Generation 6)";
-            case "generation-vii": return "Alola (Generation 7)";
-            case "generation-viii": return "Galar (Generation 8)";
-            case "generation-ix": return "Paldea (Generation 9)";
-            default: return "Unknown Region";
-        }
+        return switch (gen) {
+            case "generation-i" -> "Kanto (Generation 1)";
+            case "generation-ii" -> "Johto (Generation 2)";
+            case "generation-iii" -> "Hoenn (Generation 3)";
+            case "generation-iv" -> "Sinnoh (Generation 4)";
+            case "generation-v" -> "Unova (Generation 5)";
+            case "generation-vi" -> "Kalos (Generation 6)";
+            case "generation-vii" -> "Alola (Generation 7)";
+            case "generation-viii" -> "Galar (Generation 8)";
+            case "generation-ix" -> "Paldea (Generation 9)";
+            default -> "Unknown Region";
+        };
     }
 
     private String capitalize(String text) {

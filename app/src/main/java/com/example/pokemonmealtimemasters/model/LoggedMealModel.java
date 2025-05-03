@@ -6,11 +6,4 @@ package com.example.pokemonmealtimemasters.model;
  */
 public record LoggedMealModel(String name, double calories, double protein, double totalSugars,
                               long timestamp) {
-    public LoggedMealModel(String name, double calories, double protein, double totalSugars, long timestamp) {
-        this.name = name;
-        this.calories = calories;
-        this.protein = protein;
-        this.totalSugars = totalSugars;
-        this.timestamp = timestamp;
-    }
 }

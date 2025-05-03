@@ -6,6 +6,9 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.OvershootInterpolator;
 
+/**
+ * Various UI Animation effects.
+ */
 public class AnimationUtils {
 
     // Simple press down and up animation
@@ -25,7 +28,7 @@ public class AnimationUtils {
                 .start();
     }
 
-    // Pop-in effect (e.g., for new items appearing)
+    // Pop-in effect
     public static void applyPopInAnimation(View view) {
         if (view == null) return;
         view.setScaleX(0.5f);
@@ -40,7 +43,7 @@ public class AnimationUtils {
                 .start();
     }
 
-    // Gentle bounce effect (e.g., for rewards)
+    // Gentle bounce effect
     public static void applyBounceAnimation(View view) {
         if (view == null) return;
         ObjectAnimator bounce = ObjectAnimator.ofFloat(view, "translationY", 0f, -30f, 0f);
@@ -48,7 +51,6 @@ public class AnimationUtils {
         bounce.setDuration(600);
         bounce.start();
     }
-
 
     // Fade-in animation
     public static void applyFadeInAnimation(View view, long duration) {
@@ -71,7 +73,6 @@ public class AnimationUtils {
                 .withEndAction(endAction)
                 .start();
     }
-
 
     // Dialog entrance animation (slide up and fade in)
     public static void applyDialogEntranceAnimation(View dialogView) {

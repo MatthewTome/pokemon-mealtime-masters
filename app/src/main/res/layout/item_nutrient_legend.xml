@@ -13,7 +13,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:layout_marginEnd="8dp"
-        tools:background="#FF0000"/>
+        tools:background="@color/segment_1"/>
 
     <TextView
         android:id="@+id/legend_text"
@@ -21,6 +21,6 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:textAppearance="?attr/textAppearanceBodyMedium"
-        tools:text="Chicken Breast - 25g (50%)"/>
+        tools:text="Breakfast Sandwich: 250 kcal (45%)"/>
 
 </LinearLayout>

@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.coil)
     implementation(libs.androidx.fragment.testing)
+    implementation(libs.androidx.lifecycle.process)
 
     // Testing dependencies
     testImplementation(libs.junit)

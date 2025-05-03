@@ -27,6 +27,21 @@
         <item name="android:textColor">@color/black</item>
     </style>
 
+    <style name="ShapeAppearance.App.Dialog" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item> <!-- Adjust corner radius as needed -->
+    </style>
+
+    <style name="SectionTitleTextView" parent="Widget.AppCompat.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">24dp</item> <!-- Consistent spacing -->
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:textAppearance">?attr/textAppearanceTitleMedium</item> <!-- Or Headline6, etc. -->
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <!-- Base application theme. -->
     <style name="Theme.PokemonMealtimeMasters" parent="Theme.MaterialComponents.NoActionBar">
         <!-- Primary brand color. -->
@@ -50,7 +65,11 @@
 
     <!-- Custom Dialog Theme -->
     <style name="Theme_MPM_Dialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <!-- You can keep or change the colorPrimary -->
         <item name="colorPrimary">@color/purple_500</item>
+
+        <!-- Apply the custom shape appearance for rounded corners -->
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.App.Dialog</item>
     </style>
 
     <!-- Specific style for Bottom Sheets -->

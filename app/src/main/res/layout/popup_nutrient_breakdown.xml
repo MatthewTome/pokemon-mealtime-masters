@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -10,10 +11,10 @@
         android:id="@+id/popup_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceTitleLarge"
-        android:gravity="center"
-        android:layout_marginBottom="16dp"
-        tools:text="Protein Sources" />
+        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+    android:gravity="center"
+    android:layout_marginBottom="8dp"
+    tools:text="Protein Sources" />
 
     <TextView
         android:id="@+id/popup_total"
@@ -21,8 +22,41 @@
         android:layout_height="wrap_content"
         android:textAppearance="?attr/textAppearanceTitleMedium"
         android:gravity="center"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         tools:text="Total: 50g" />
+
+    <!-- Educational Tip Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <ImageView
+            android:id="@+id/popup_tip_icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:src="@drawable/ic_tip_protein_low"
+        app:tint="?attr/colorPrimary"
+        android:contentDescription="@string/content_desc_educational_tip_icon"/>
+
+        <TextView
+            android:id="@+id/popup_educational_tip"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:text="Protein helps build strong muscles! Keep it up!" />
+    </LinearLayout>
+    <!-- End Tip Section -->
 
     <LinearLayout
         android:id="@+id/segmented_bar_container"
@@ -32,15 +66,24 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"
         android:background="@drawable/segmented_bar_background" >
+        <!-- Segments added dynamically -->
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/legend_container"
+    <!-- Added ScrollView for legend -->
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:maxHeight="200dp">
-    </LinearLayout>
+        android:maxHeight="200dp"
+        android:fadeScrollbars="false">
+
+        <LinearLayout
+            android:id="@+id/legend_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <!-- Legend items added dynamically -->
+        </LinearLayout>
+    </ScrollView>
 
     <Button
         android:id="@+id/button_close_popup"

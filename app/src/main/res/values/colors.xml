@@ -11,7 +11,7 @@
     <color name="amber_700">#FFD966</color>
     <color name="pink_300">#FFC2D1</color>
     <color name="green_500">#7FFFD4</color>
-    <color name="sheetBackground">#FFF5E1</color>
+    <color name="sheet_background">#FFF5E1</color>
     <color name="primary">#FF7043</color>
     <color name="accent">#42A5F5</color>
     <color name="segment_1">#4CAF50</color>
@@ -24,4 +24,5 @@
     <color name="grey_dark">#232323</color>
     <color name="protein_color">#34cb34</color>
     <color name="sugar_color">#F44336</color>
+    <color name="caution_yellow">#EBC106</color>
 </resources>

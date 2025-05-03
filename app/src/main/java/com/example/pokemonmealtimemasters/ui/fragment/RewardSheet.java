@@ -55,7 +55,6 @@ public class RewardSheet extends BottomSheetDialogFragment {
 
         title.setText(R.string.reward_title); // “You caught a new Pokémon!”
 
-        // Set up Retrofit just to fetch the name
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://pokeapi.co/api/v2/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -69,7 +68,6 @@ public class RewardSheet extends BottomSheetDialogFragment {
                 String displayName = pokemonId;
                 if (resp.isSuccessful() && resp.body() != null) {
                     String name = resp.body().name;
-                    // capitalize first letter
                     displayName = Character.toUpperCase(name.charAt(0)) + name.substring(1);
                 }
                 title.setText(getString(R.string.reward_caught_format, displayName));
@@ -94,7 +92,6 @@ public class RewardSheet extends BottomSheetDialogFragment {
             @Override
             public void onFailure(@NonNull Call<PokeApiService.Pokemon> call,
                                   @NonNull Throwable t) {
-                // fallback: just show ID in the title, and a placeholder image
                 title.setText(getString(R.string.reward_caught_format, pokemonId));
                 image.setImageResource(R.drawable.pokeball_silhouette);
             }

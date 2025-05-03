@@ -49,7 +49,7 @@ public class BadgesAdapter extends RecyclerView.Adapter<BadgesAdapter.BadgeVH>
     {
         BadgeModel b   = badges.get(pos);
         @DrawableRes
-        int resId      = getDrawableId(b.getId(), b.isEarned());
+        int resId      = getDrawableId(b.id(), b.isEarned());
 
         h.image.setImageResource(resId);
         h.image.setAlpha(b.isEarned() ? 1f : 0.25f);
@@ -85,15 +85,15 @@ public class BadgesAdapter extends RecyclerView.Adapter<BadgesAdapter.BadgeVH>
         View v = LayoutInflater.from(ctx).inflate(R.layout.popup_badge, null);
 
         ((ImageView) v.findViewById(R.id.popupBadgeImage))
-                .setImageResource(getDrawableId(b.getId(), true));
+                .setImageResource(getDrawableId(b.id(), true));
 
         ((TextView) v.findViewById(R.id.popupBadgeTitle))
-                .setText(b.getTitle());
+                .setText(b.title());
 
         ((TextView) v.findViewById(R.id.popupBadgeDesc))
-                .setText(b.getDescription());
+                .setText(b.description());
 
-        String date = DateFormat.getDateInstance().format(new Date(b.getAwardedAt()));
+        String date = DateFormat.getDateInstance().format(new Date(b.awardedAt()));
         ((TextView) v.findViewById(R.id.popupBadgeDate))
                 .setText(ctx.getString(R.string.badge_awarded_on, date));
 
